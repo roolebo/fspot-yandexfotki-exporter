@@ -14,7 +14,6 @@ namespace Mono.Yandex.Fotki{
 		{
 			sr = new StringWriter ();
 			writer = XmlTextWriter (sr);
-			
 			writer.Formatting = Formatting.Indented;
 			writer.Indentation = 2;
 		}

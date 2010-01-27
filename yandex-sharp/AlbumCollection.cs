@@ -6,18 +6,18 @@ namespace Mono.Yandex.Fotki {
 	public class AlbumCollection {
 		Connection conn;
 		
-		public Collection (Connection conn)
+		public AlbumCollection (Connection conn)
 		{
 			this.conn = conn;
 		}
 		
-		public Album Add (Album album)
+		public void Add (Album album)
 		{	
 		}
 		
 		private string GetXmlForAdd (string title, string summary, string password)
 		{
-			XmlUtil xml = XmlUtil ();
+			XmlUtil xml = new XmlUtil ();
 			xml.WriteStartElement ("entry");
 			xml.WriteAttributeString ("xmlns","http://www.w3.org/2005/Atom");
 			xml.WriteAttributeString ("xmlns","f",null,"yandex:fotki");

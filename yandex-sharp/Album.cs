@@ -4,21 +4,11 @@ using System;
 namespace Mono.Yandex.Folki
 {
 	public class Album{
-		Connection conn;
-		
-		public string title {
-			get { return title; }
-			set { x = title; }
-		}
-		public string summary {
-			get { return summary; }
-			set { x = summary; }
-		}
-		public string password {
-			get { return password; }
-			set { x = password; }
-		}
-		string id;
+		private Connection conn;
+		private string id;
+		public string title;
+		public string summary;
+		public string password;
 		
 		public Album (Connection conn)
 		{

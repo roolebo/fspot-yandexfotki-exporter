@@ -8,7 +8,22 @@ namespace Mono.Yandex.Fotki {
 		public string title;
 		public string link;
 		
-		private string GetXmlForAdd (string title, string summary, string password)
+		public void Add (Album album)
+		{
+			
+		}
+		
+		public void Edit (Album album)
+		{
+			
+		}
+		
+		public void Delete (Album album)
+		{
+			
+		}
+		
+		private string GetXmlForAdd (Album album)
 		{
 			XmlUtil xml = new XmlUtil ();
 			xml.WriteStartElement ("entry");
@@ -23,10 +38,8 @@ namespace Mono.Yandex.Fotki {
 			return xml.GetDocumentString ();
 		}
 		
-		private void ParseXml (string xml)
+		private void ParseXml (XPathDocument doc)
 		{
-			var sr = new StringReader (xml);
-			var doc = new XPathDocument (sr);
 			var nav = doc.CreateNavigator ();
 			
 			title = (string)nav.Evaluate ("/feed/title");

@@ -15,14 +15,12 @@ namespace Mono.Yandex.Fotki{
 		public bool disable_comments;
 		public bool hide_original;
 		
-		public Picture (string xml)
+		public Picture (XPathDocument xml)
 		{
 			ParseXml (xml);
 		}
 		
-		private void ParseXml (string xml){			
-			var sr = new StringReader (xml);
-			var doc = new XPathDocument (sr);
+		private void ParseXml (XPathDocument doc){			
 			var nav = doc.CreateNavigator ();
 			
 			id = nav.Evaluate("substring-after('/entry/id',':photo:')");

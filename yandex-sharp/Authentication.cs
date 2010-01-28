@@ -79,6 +79,10 @@ namespace Mono.Yandex.Fotki {
             }
             
         }
+
+        public String GetAuthorizationToken()
+        {
+        }
         /*
         public static void Main()
         {

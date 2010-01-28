@@ -6,12 +6,13 @@ using System.Xml.XPath;
 namespace Mono.Yandex.Fotki
 {
 	public class Album{
-		public string id;
+		public string id = 0;
 		public string title;
 		public string author;
 		public string summary;
 		public bool protect;
-		public int count;
+		public int count = 0;
+		public string password;
 		
 		public Album (XPathDocument xml)
 		{

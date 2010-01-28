@@ -9,8 +9,8 @@ namespace Mono.Yandex.Fotki{
 		public string title;
 		public string author;
 		public string access;
-		public string id;
-		public string image_src;
+		public string id = 0;
+		public string image_src = string.Empty;
 		public bool xxx;
 		public bool disable_comments;
 		public bool hide_original;

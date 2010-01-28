@@ -1,6 +1,8 @@
 using System;
 using System.Xml;
 using System.Xml.XPath;
+using System.IO;
+using System.Text;
 
 namespace Mono.Yandex.Fotki {
 
@@ -25,17 +27,22 @@ namespace Mono.Yandex.Fotki {
 		
 		private string GetXmlForAdd (Album album)
 		{
-			XmlUtil xml = new XmlUtil ();
-			xml.WriteStartElement ("entry");
-			xml.WriteAttributeString ("xmlns","http://www.w3.org/2005/Atom");
-			xml.WriteAttributeString ("xmlns","f",null,"yandex:fotki");
-			xml.WriteElementString ("title","Заголовок");
-			xml.WriteElementString ("summary","Описание альбома");
-			if (password == null || password == String.Empty)
-				xml.WriteElementString ("f:password","123");
-			xml.WriteEndElement ();
+			StringWriter sr = new StringWriter ();
+			writer = new XmlTextWriter (sr);
+			writer.Formatting = Formatting.Indented;
+			writer.Indentation = 2;
 			
-			return xml.GetDocumentString ();
+			writer.WriteStartElement ("entry");
+			writer.WriteAttributeString ("xmlns","http://www.w3.org/2005/Atom");
+			writer.WriteAttributeString ("xmlns","f",null,"yandex:fotki");
+			writer.WriteElementString ("title",album.title);
+			writer.WriteElementString ("summary",album.summary);
+			if (album.protect)
+				writer.WriteElementString ("f:password",album.password);
+			writer.WriteEndElement ();
+			
+			writer.Close ();
+			return sr.ToString ();
 		}
 		
 		private void ParseXml (XPathDocument doc)

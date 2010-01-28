@@ -3,12 +3,19 @@ using System.Xml;
 using System.Xml.XPath;
 using System.IO;
 using System.Text;
+using System.Collections;
 
 namespace Mono.Yandex.Fotki {
 
 	public class AlbumCollection {
 		public string title;
 		public string link;
+		private ArrayList albums;
+		
+		public AlbumCollection ()
+		{
+			this.albums = new ArrayList ();
+		}
 		
 		public void Add (Album album)
 		{
@@ -53,7 +60,8 @@ namespace Mono.Yandex.Fotki {
 			link = (string)nav.Evaluate ("/feed/link[rel='alternative']");
 			var iterator = nav.Select ("/feed/entry");
 			foreach (XPathNodeIterator item in iterator){
-				//Создание альбомов
+				albums.Add (new Album (new XPathDocument 
+				                       (new StringReader (item))));
 			}
 		}
 	}

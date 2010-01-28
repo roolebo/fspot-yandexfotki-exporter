@@ -1,8 +1,9 @@
 using System;
+using System.Net;
 
-namespace Mono.Yandex.Fotki{
+namespace Mono.Yandex.Fotki {
 
-	public class Connection{
+	public class Connection {
 		
 		public Connection ()
 		{

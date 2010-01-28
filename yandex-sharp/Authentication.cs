@@ -9,7 +9,6 @@ using System.Text;
 using System.Collections.Generic;
 using Mono.Math;
 
-<<<<<<< HEAD:yandex-sharp/Authentication.cs
 namespace Mono.Yandex.Fotki {
     class Authentication {
         private class PublicKey {

@@ -6,17 +6,18 @@ using System.Xml.XPath;
 namespace Mono.Yandex.Fotki{
 
 	public class Picture{
-		string title;
-		string author;
-		string access;
-		string id;
-		string image_src;
-		bool xxx;
-		bool disable_comments;
-		bool hide_original;
+		public string title;
+		public string author;
+		public string access;
+		public string id;
+		public string image_src;
+		public bool xxx;
+		public bool disable_comments;
+		public bool hide_original;
 		
-		public Picture ()
+		public Picture (string xml)
 		{
+			ParseXml (xml);
 		}
 		
 		private void ParseXml (string xml){			

@@ -18,10 +18,15 @@ namespace Mono.Yandex.Fotki
 			this.id = aid;
 		}
 		
+		public Album (string xml)
+		{
+			ParseXml (xml);
+		}
+		
 		private void ParseXml (string xml)
 		{
 			var sr = new StringReader (xml);
-			var doc = new XPathDocument (sr);
+			var doc = new XPathDocument ();
 			var nav = doc.CreateNavigator ();
 			id = (string)nav.Evaluate ("substring-after('/entry/id',':album:')");
 			title = (string)nav.Evaluate ("/entry/title");

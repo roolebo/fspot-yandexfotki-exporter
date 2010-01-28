@@ -26,16 +26,13 @@ namespace Mono.Yandex.Fotki{
 
 		private void ParseXml (string xml)
 		{
-			StringReader sr = new StringReader (xml);
-			XPathDocument doc = new XPathDocument (sr);
-			XPathNavigator nav = doc.CreateNavigator ();
-			XPathExpression expr = nav.Compile ("/*/*/*/@href");
-			XPathNodeIterator iterator = nav.Select (expr);
+			var sr = new StringReader (xml);
+			var doc = new XPathDocument (sr);
+			var nav = doc.CreateNavigator ();
+			var iterator = nav.Select("//app:collection/@href");
+			albums = iterator.Current;
 			iterator.MoveNext ();
-			albums = iterator.Current.ToString ();
-			iterator.MoveNext ();
-			photos = iterator.Current.ToString ();
+			photos = iterator.Current;
 		}
-
 	}
 }

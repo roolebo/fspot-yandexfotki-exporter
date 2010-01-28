@@ -1,21 +1,29 @@
 using System;
 using System.Xml;
+using System.Xml.XPath;
 
 namespace Mono.Yandex.Fotki {
 
 	public class AlbumCollection {
-		Connection conn;
-		
-		public AlbumCollection (Connection conn)
-		{
-			this.conn = conn;
-		}
+		public string title;
+		public string link;
 		
 		public void Add (Album album)
-		{	
+		{
+			
 		}
 		
-		private string GetXmlForAdd (string title, string summary, string password)
+		public void Edit (Album album)
+		{
+			
+		}
+		
+		public void Delete (Album album)
+		{
+			
+		}
+		
+		private string GetXmlForAdd (Album album)
 		{
 			XmlUtil xml = new XmlUtil ();
 			xml.WriteStartElement ("entry");
@@ -28,6 +36,18 @@ namespace Mono.Yandex.Fotki {
 			xml.WriteEndElement ();
 			
 			return xml.GetDocumentString ();
+		}
+		
+		private void ParseXml (XPathDocument doc)
+		{
+			var nav = doc.CreateNavigator ();
+			
+			title = (string)nav.Evaluate ("/feed/title");
+			link = (string)nav.Evaluate ("/feed/link[rel='alternative']");
+			var iterator = nav.Select ("/feed/entry");
+			foreach (XPathNodeIterator item in iterator){
+				//Создание альбомов
+			}
 		}
 	}
 }

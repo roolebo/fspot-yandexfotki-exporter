@@ -5,7 +5,7 @@ using System.Xml.XPath;
 
 namespace Mono.Yandex.Fotki{
 
-	public class Picture{
+	public class Photo{
 		public string title;
 		public string author;
 		public string access;
@@ -15,7 +15,7 @@ namespace Mono.Yandex.Fotki{
 		public bool disable_comments;
 		public bool hide_original;
 		
-		public Picture (XPathDocument xml)
+		public Photo (XPathDocument xml)
 		{
 			ParseXml (xml);
 		}

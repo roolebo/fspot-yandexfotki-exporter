@@ -30,9 +30,9 @@ namespace Mono.Yandex.Fotki{
 			var doc = new XPathDocument (sr);
 			var nav = doc.CreateNavigator ();
 			var iterator = nav.Select("//app:collection/@href");
-			albums = iterator.Current.ToString ();
+			albums = iterator.Current;
 			iterator.MoveNext ();
-			photos = iterator.Current.ToString ();
+			photos = iterator.Current;
 		}
 	}
 }

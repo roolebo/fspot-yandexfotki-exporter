@@ -23,17 +23,16 @@ namespace Mono.Yandex.Fotki{
 			var sr = new StringReader (xml);
 			var doc = new XPathDocument (sr);
 			var nav = doc.CreateNavigator ();
-			id = nav.Select ("//id").Current;
-			id = id.Substring (id.LastIndexOf (':'));
-			title = nav.Select ("//title").Current;
-			author = nav.Select ("//author/name").Current;
-			access = nav.Select ("//f:access/@value").Current;
-			xxx = nav.Select ("//f:xxx/@value").Current.ValueAsBoolean;
-			hide_original = nav.Select ("//f:hide_original/@value")
-				.Current.ValueAsBoolean;
-			disable_comments = nav.Select ("//f:disable_comments/@value")
-				.Current.ValueAsBoolean;
-			image_src = nav.Select ("//content/@src").Current;			
+			
+			id = nav.Evaluate("substring-after('/entry/id',':photo:')");
+			
+			title = (string)nav.Evaluate ("/entry/title");
+			author = (string)nav.Evaluate ("/entry/author/name");
+			access = (string)nav.Evaluate ("/entry/f:access/@value");
+			xxx = (bool)nav.Evaluate ("boolean(/entry/f:xxx/@value)");
+			hide_original = (bool)nav.Evaluate ("/entry/f:hide_original/@value");
+			disable_comments = (bool)nav.Evaluate ("/entry/f:disable_comments/@value");
+			image_src = nav.SelectSingleNode ("/entry/content/@src");			
 		}
 	}
 }

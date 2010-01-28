@@ -13,10 +13,22 @@ namespace Mono.Yandex.Fotki
 		public bool protect;
 		public int count = 0;
 		public string password;
+		private PhotoCollection images;
 		
 		public Album (XPathDocument xml)
 		{
 			ParseXml (xml);
+		}
+		
+		public void Add ()
+		{}
+		
+		public void Edit ()
+		{}
+		
+		public void Delete ()
+		{
+			
 		}
 		
 		private void ParseXml (XPathDocument doc)

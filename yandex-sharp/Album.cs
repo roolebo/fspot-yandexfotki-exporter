@@ -1,7 +1,7 @@
 
 using System;
 
-namespace Mono.Yandex.Folki
+namespace Mono.Yandex.Fotki
 {
 	public class Album{
 		private Connection conn;

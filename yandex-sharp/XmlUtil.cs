@@ -13,7 +13,7 @@ namespace Mono.Yandex.Fotki{
 		public XmlUtil ()
 		{
 			sr = new StringWriter ();
-			writer = XmlTextWriter (sr);
+			writer = new XmlTextWriter (sr);
 			writer.Formatting = Formatting.Indented;
 			writer.Indentation = 2;
 		}
@@ -28,9 +28,19 @@ namespace Mono.Yandex.Fotki{
 			writer.WriteStartElement (elem, null);
 		}
 		
+		public void WriteAttributeString (string prefix, string val)
+		{
+			writer.WriteAttributeString (prefix, val);
+		}
+		
 		public void WriteAttributeString (string prefix, string name, string ns, string val)
 		{
 			writer.WriteAttributeString (prefix, name, ns, val);
+		}
+		
+		public void WriteEndElement ()
+		{
+			writer.WriteEndElement ();
 		}
 		
 		public string GetDocumentString ()

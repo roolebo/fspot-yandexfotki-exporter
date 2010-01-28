@@ -26,9 +26,7 @@ namespace Mono.Yandex.Fotki{
 		{
 			var nav = xml.CreateNavigator ();
 			
-			title = (string)nav.Evaluate ("/feed/title");
-			link = (string)nav.Evaluate ("/feed/link[rel='alternative']");
-			var iterator = nav.Select ("/feed/entry");
+			var iterator = nav.Select ("//entry");
 			foreach (XPathNodeIterator item in iterator){
 				albums.Add (new Album (new XPathDocument 
 				                       (new StringReader (item))));

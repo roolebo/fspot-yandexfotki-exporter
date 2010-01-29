@@ -17,7 +17,7 @@ namespace Mono.Yandex.Fotki{
 		
 		public void Upload (Photo photo)
 		{
-			
+			RequestManager.Add (photo);
 		}
 		
 		public IEnumerator GetEnumerator ()

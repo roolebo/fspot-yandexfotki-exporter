@@ -19,7 +19,7 @@ namespace Mono.Yandex.Fotki {
 		
 		public void Add (Album album)
 		{
-			
+			RequestMananger.Add (album);
 		}
 		
 		public IEnumerable GetEnumerator ()

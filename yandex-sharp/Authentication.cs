@@ -10,8 +10,9 @@ using System.Net;
 using System.Xml.XPath;
 using System.IO;
 using System.Collections.Generic;
+using System.Web;
 using Mono.Math;
-
+//TODO catch and rethrow exceptions
 namespace Mono.Yandex.Fotki {
     class Authentication {
         private const string auth_key_uri = "http://auth.mobile.yandex.ru/yamrsa/key/";
@@ -89,7 +90,7 @@ namespace Mono.Yandex.Fotki {
         static string GetAuthorizationToken (string username, string password)
         {
             //getting public key
-            //System.Net.ServicePointManager.Expect100Continue = false;
+            System.Net.ServicePointManager.Expect100Continue = false;
             HttpWebRequest request = (HttpWebRequest) WebRequest.Create (auth_key_uri);
             HttpWebResponse response = (HttpWebResponse) request.GetResponse ();
             XPathNavigator navigator = (new XPathDocument (new StreamReader (
@@ -110,7 +111,7 @@ namespace Mono.Yandex.Fotki {
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
             byte[] parameters = Encoding.UTF8.GetBytes ("request_id=" +
-                    request_id + "&credentials=" + encoded_credentials);
+                    request_id + "&credentials=" + HttpUtility.UrlEncode(encoded_credentials));
             
             Stream request_stream = request.GetRequestStream ();
             request_stream.Write (parameters, 0, parameters.Length);
@@ -123,15 +124,6 @@ namespace Mono.Yandex.Fotki {
             response.Close ();
 
             return token;
-        }
-
-        public static void Main()
-        {
-            string username = "";
-            string password = "";
-
-            Console.WriteLine (Authentication.GetAuthorizationToken (username, password));
-
         }
     }
 }   

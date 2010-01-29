@@ -7,12 +7,12 @@ namespace Mono.Yandex.Fotki
 {
 	public class Album:PhotoCollection {
 		
-		public string id = 0;
+		public string id;
 		public string title;
 		public string author;
 		public string summary;
-		public bool protect;
-		public int count = 0;
+		public bool protect = false;
+		public int count;
 		public string password;
 		
 		public Album (XPathDocument xml)

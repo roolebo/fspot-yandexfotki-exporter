@@ -8,12 +8,11 @@ namespace Mono.Yandex.Fotki{
 	public class Photo{
 		public string title;
 		public string author;
-		public string access;
-		public string id = 0;
-		public string image_src = string.Empty;
-		public bool xxx;
-		public bool disable_comments;
-		public bool hide_original;
+		public string id;
+		public string filename;
+		public bool xxx = false;
+		public bool disable_comments = false;
+		public bool hide_original = false;
 		
 		public Photo (XPathDocument xml)
 		{

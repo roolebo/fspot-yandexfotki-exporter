@@ -7,8 +7,8 @@ namespace Mono.Yandex.Fotki{
 	public class Service{
 		public string user;
 		public string password;
-		public string albums;
-		public string photos;
+		public PhotoCollection photos;
+		public AlbumCollection albums;
 
 		public Service (string user)
 		{
@@ -19,6 +19,12 @@ namespace Mono.Yandex.Fotki{
 		{
 			this.password = password;
 		}
+		
+		private void DownloadPhotoCollection ()
+		{}
+		
+		private void DownloadAlbumCollection ()
+		{}
 
 		private void ParseXml (string xml)
 		{
@@ -26,9 +32,9 @@ namespace Mono.Yandex.Fotki{
 			var doc = new XPathDocument (sr);
 			var nav = doc.CreateNavigator ();
 			var iterator = nav.Select("//app:collection/@href");
-			albums = iterator.Current;
+			albums.link = iterator.Current.ToString ();
 			iterator.MoveNext ();
-			photos = iterator.Current;
+			photos.link = iterator.Current.ToString ();
 		}
 	}
 }

@@ -7,6 +7,7 @@ using System.Xml.XPath;
 namespace Mono.Yandex.Fotki{
 	
 	public class PhotoCollection:IEnumerable {
+		public string link;
 		private ArrayList photos;
 
 		public PhotoCollection (XpathDocument xml)

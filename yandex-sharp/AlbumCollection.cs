@@ -8,7 +8,6 @@ using System.Collections;
 namespace Mono.Yandex.Fotki {
 
 	public class AlbumCollection:IEnumerable {
-		public string title;
 		public string link;
 		private ArrayList albums;
 		

@@ -10,7 +10,7 @@ namespace Mono.Yandex.Fotki{
 		public string link;
 		private ArrayList photos;
 
-		public PhotoCollection (XpathDocument xml)
+		public PhotoCollection (XPathDocument xml)
 		{
 			ParseXml (xml);
 		}

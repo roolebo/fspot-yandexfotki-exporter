@@ -6,11 +6,17 @@
 //
 using System;
 using System.Text;
+using System.Net;
+using System.Xml.XPath;
+using System.IO;
 using System.Collections.Generic;
 using Mono.Math;
 
 namespace Mono.Yandex.Fotki {
     class Authentication {
+        private const string auth_key_uri = "http://auth.mobile.yandex.ru/yamrsa/key/";
+        private const string auth_token_uri = "http://auth.mobile.yandex.ru/yamrsa/token/";
+
         private class PublicKey {
             public BigInteger module;
             private BigInteger exponent;
@@ -80,21 +86,52 @@ namespace Mono.Yandex.Fotki {
             
         }
 
-        public String GetAuthorizationToken()
+        static string GetAuthorizationToken (string username, string password)
         {
+            //getting public key
+            //System.Net.ServicePointManager.Expect100Continue = false;
+            HttpWebRequest request = (HttpWebRequest) WebRequest.Create (auth_key_uri);
+            HttpWebResponse response = (HttpWebResponse) request.GetResponse ();
+            XPathNavigator navigator = (new XPathDocument (new StreamReader (
+                            response.GetResponseStream ()))).CreateNavigator ();
+            string public_key = (string) navigator.Evaluate ("string(/response/key)");
+            string request_id = (string) navigator.Evaluate ("string(/response/request_id)");
+            response.Close ();
+            
+            //encoding
+            EncryptionProvider encryption_provider = new EncryptionProvider ();
+            encryption_provider.ImportPublicKey (public_key);
+            string credentials = String.Format (@"<credentials login=""{0}"" password=""{1}""/>", username, password);
+            string encoded_credentials = Convert.ToBase64String (encryption_provider.Encrypt 
+                    (new UTF8Encoding ().GetBytes (credentials)));  
+                    
+            //sending encoded data and receiving authorization token
+            request = (HttpWebRequest) WebRequest.Create (auth_token_uri);
+            request.Method = "POST";
+            request.ContentType = "application/x-www-form-urlencoded";
+            byte[] parameters = Encoding.UTF8.GetBytes ("request_id=" +
+                    request_id + "&credentials=" + encoded_credentials);
+            
+            Stream request_stream = request.GetRequestStream ();
+            request_stream.Write (parameters, 0, parameters.Length);
+            request_stream.Close ();
+
+            response = (HttpWebResponse) request.GetResponse ();
+            navigator = (new XPathDocument (new StreamReader (
+                            response.GetResponseStream ()))).CreateNavigator ();
+            string token = (string) navigator.Evaluate ("string(/response/token)");
+            response.Close ();
+
+            return token;
         }
-        /*
+
         public static void Main()
         {
-            EncryptionProvider encryption_provider = new EncryptionProvider ();
-            string data = "test";
+            string username = "";
+            string password = "";
 
-            encryption_provider.ImportPublicKey(
-            "BFC949E4C7ADCC6F179226D574869CBF44D6220DA37C054C64CE48D4BAA36B039D8206E45E4576BFDB1D3B40D958FF0894F6541717824FDEBCEDD27C4BE1F057#10001");
+            Console.WriteLine (Authentication.GetAuthorizationToken (username, password));
 
-            byte[] encoded = encryption_provider.Encrypt(Encoding.ASCII.GetBytes(data));
-            Console.WriteLine(Convert.ToBase64String(encoded));
         }
-        */
     }
 }   

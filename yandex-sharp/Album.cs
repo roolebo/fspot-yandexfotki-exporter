@@ -15,7 +15,7 @@ namespace Mono.Yandex.Fotki
 		public int count;
 		public string password;
 		
-		public Album (XPathDocument xml)
+		public Album (XPathDocument xml):base (xml)
 		{
 			ParseXml (xml);
 		}

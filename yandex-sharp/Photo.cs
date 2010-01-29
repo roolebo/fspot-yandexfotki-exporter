@@ -19,6 +19,21 @@ namespace Mono.Yandex.Fotki{
 			ParseXml (xml);
 		}
 		
+		public void Delete ()
+		{
+			RequestManager.Delete (this);
+		}
+		
+		public byte[] Download ()
+		{
+			return RequestManager.Download (this);
+		}
+		
+		public void Update ()
+		{
+			RequestManager.Edit (this);
+		}
+		
 		private void ParseXml (XPathDocument doc){			
 			var nav = doc.CreateNavigator ();
 			

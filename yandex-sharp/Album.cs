@@ -22,11 +22,13 @@ namespace Mono.Yandex.Fotki
 		
 		public void Delete ()
 		{
-			
+			RequestManager.Delete (this);
 		}
 		
 		public void Update ()
-		{}
+		{
+			RequestManager.Edit (this);
+		}
 		
 		private void ParseXml (XPathDocument doc)
 		{

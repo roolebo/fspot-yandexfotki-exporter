@@ -4,24 +4,20 @@ using System.Xml;
 using System.Xml.XPath;
 
 namespace Mono.Yandex.Fotki{
-	public class ServiceDocument{
-		Connection conn;
+	public class Service{
 		public string user;
+		public string password;
 		public string albums;
 		public string photos;
 
-		public ServiceDocument (Connection conn)
-		{
-			this.conn = conn;
-		}
-
-		public ServiceDocument (Connection conn, string user) : this(conn)
+		public Service (string user)
 		{
 			this.user = user;
 		}
 		
-		public void RequestDocument ()
+		public Service (string user, string password):this (user)
 		{
+			this.password = password;
 		}
 
 		private void ParseXml (string xml)

@@ -6,21 +6,26 @@ using System.Xml.XPath;
 
 namespace Mono.Yandex.Fotki{
 	
-	public class PhotoCollection{
+	public class PhotoCollection:IEnumerable {
 		private ArrayList photos;
 
-		public PhotoCollection ()
+		public PhotoCollection (XpathDocument xml)
 		{
+			ParseXml (xml);
 		}
 		
-		public void Add (Photo photo)
-		{}
+		public void Upload (Photo photo)
+		{
+			
+		}
 		
-		public void Edit (Photo photo)
-		{}
-		
-		public void Delete (Photo photo)
-		{}
+		public IEnumerator GetEnumerator ()
+		{
+			foreach (Photo photo in photos)
+			{
+				yield return photo;
+			}
+		}
 		
 		private void ParseXml (XPathDocument xml)
 		{
@@ -32,5 +37,6 @@ namespace Mono.Yandex.Fotki{
 				                       (new StringReader (item))));
 			}
 		}
+		
 	}
 }

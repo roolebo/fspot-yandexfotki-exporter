@@ -5,7 +5,8 @@ using System.Xml.XPath;
 
 namespace Mono.Yandex.Fotki
 {
-	public class Album{
+	public class Album:PhotoCollection {
+		
 		public string id = 0;
 		public string title;
 		public string author;
@@ -13,23 +14,19 @@ namespace Mono.Yandex.Fotki
 		public bool protect;
 		public int count = 0;
 		public string password;
-		private PhotoCollection images;
 		
 		public Album (XPathDocument xml)
 		{
 			ParseXml (xml);
 		}
 		
-		public void Add ()
-		{}
-		
-		public void Edit ()
-		{}
-		
 		public void Delete ()
 		{
 			
 		}
+		
+		public void Update ()
+		{}
 		
 		private void ParseXml (XPathDocument doc)
 		{

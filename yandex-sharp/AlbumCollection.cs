@@ -7,14 +7,15 @@ using System.Collections;
 
 namespace Mono.Yandex.Fotki {
 
-	public class AlbumCollection {
+	public class AlbumCollection:IEnumerable {
 		public string title;
 		public string link;
 		private ArrayList albums;
 		
-		public AlbumCollection ()
+		public AlbumCollection (XPathDocument xml)
 		{
 			this.albums = new ArrayList ();
+			ParseXml (xml);
 		}
 		
 		public void Add (Album album)
@@ -22,16 +23,15 @@ namespace Mono.Yandex.Fotki {
 			
 		}
 		
-		public void Edit (Album album)
+		public IEnumerable GetEnumerator ()
 		{
-			
+			foreach (Album album in albums)
+			{
+				yield return album;
+			}
 		}
 		
-		public void Delete (Album album)
-		{
-			
-		}
-		
+		/*
 		private string GetXmlForAdd (Album album)
 		{
 			StringWriter sr = new StringWriter ();
@@ -51,6 +51,7 @@ namespace Mono.Yandex.Fotki {
 			writer.Close ();
 			return sr.ToString ();
 		}
+		*/
 		
 		private void ParseXml (XPathDocument doc)
 		{

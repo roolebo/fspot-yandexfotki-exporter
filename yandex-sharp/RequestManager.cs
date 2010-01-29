@@ -3,58 +3,58 @@ using System.Net;
 
 namespace Mono.Yandex.Fotki {
 
-    class RequestManager {
-        WebClient web_client = new WebClient ();
-
-        RequestManager ()
-        {
-        }
-
-        void Upload (Photo photo)
-        {
-        }
-
-        void Add (Album album)
-        {
-        }
-
-        void Delete (Photo photo)
-        {
-        }
-
-        void Delete (Album album)
-        {
-        }
-
-        byte[] Download (Photo photo)
-        {
-            return null;
-        }
-
-        void Edit (Photo photo)
-        {
-        }
-
-        void Edit (Album album)
-        {
-        }
-
-        void Get (Photo photo)
-        {
-        }
-
-        void Get (Album album)
-        {
-        }
-
-        void Get (Collection collection)
-        {
-        }
-
-        void Get (ServiceDocument serviceDocument)
-        {
-        }
-
-        
-    }
+ public class RequestManager {
+	        WebClient web_client = new WebClient ();
+	
+	        public RequestManager ()
+	        {
+	        }
+	
+	        public void Add (Photo photo)
+	        {
+	        }
+	
+	        public void Add (Album album)
+	        {
+	        }
+	
+	        public void Delete (Photo photo)
+	        {
+	        }
+	
+	        public void Delete (Album album)
+	        {
+	        }
+	
+	        public byte[] Download (Photo photo)
+	        {
+	            return null;
+	        }
+	
+	        public void Edit (Photo photo)
+	        {
+	        }
+	
+	        public void Edit (Album album)
+	        {
+	        }
+	
+	        public void Get (Photo photo)
+	        {
+	        }
+	
+	        public void Get (Album album)
+	        {
+	        }
+		
+		public static XPathDocument GetServiceDocument ()
+		{}
+		
+		public static XPathDocument GetPhotoCollection (string url)
+		{}
+		
+		public static XPathDocument GetAlbumCollection (string url)
+		{}
+	
+	}
 }

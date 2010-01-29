@@ -5,19 +5,33 @@ using System.Xml.XPath;
 
 namespace Mono.Yandex.Fotki{
 
-	public class Picture{
+	public class Photo{
 		public string title;
 		public string author;
-		public string access;
 		public string id;
-		public string image_src;
-		public bool xxx;
-		public bool disable_comments;
-		public bool hide_original;
+		public string filename;
+		public bool xxx = false;
+		public bool disable_comments = false;
+		public bool hide_original = false;
 		
-		public Picture (XPathDocument xml)
+		public Photo (XPathDocument xml)
 		{
 			ParseXml (xml);
+		}
+		
+		public void Delete ()
+		{
+			RequestManager.Delete (this);
+		}
+		
+		public byte[] Download ()
+		{
+			return RequestManager.Download (this);
+		}
+		
+		public void Update ()
+		{
+			RequestManager.Edit (this);
 		}
 		
 		private void ParseXml (XPathDocument doc){			

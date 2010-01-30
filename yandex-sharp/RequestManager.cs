@@ -3,7 +3,7 @@ using System.Net;
 
 namespace Mono.Yandex.Fotki {
 
- public class RequestManager {
+    public class RequestManager {
 	        WebClient web_client = new WebClient ();
 	
 	        public RequestManager ()

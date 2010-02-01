@@ -2,10 +2,11 @@
 using System;
 using System.Xml;
 using System.Xml.XPath;
+using System.Collections;
 
 namespace Mono.Yandex.Fotki{
 
-	public class Photo{
+	public class Photo {
 		public string title;
 		public string author;
 		public string id;
@@ -19,6 +20,7 @@ namespace Mono.Yandex.Fotki{
 			ParseXml (xml);
 		}
 		
+		/*
 		public void Delete ()
 		{
 			RequestManager.Delete (this);
@@ -33,19 +35,19 @@ namespace Mono.Yandex.Fotki{
 		{
 			RequestManager.Edit (this);
 		}
+		*/
 		
 		private void ParseXml (XPathDocument doc){			
 			var nav = doc.CreateNavigator ();
 			
-			id = nav.Evaluate("substring-after('/entry/id',':photo:')");
+			id = (string)nav.Evaluate("substring-after('/entry/id',':photo:')");
 			
 			title = (string)nav.Evaluate ("/entry/title");
 			author = (string)nav.Evaluate ("/entry/author/name");
-			access = (string)nav.Evaluate ("/entry/f:access/@value");
 			xxx = (bool)nav.Evaluate ("boolean(/entry/f:xxx/@value)");
 			hide_original = (bool)nav.Evaluate ("/entry/f:hide_original/@value");
 			disable_comments = (bool)nav.Evaluate ("/entry/f:disable_comments/@value");
-			image_src = nav.SelectSingleNode ("/entry/content/@src");			
+			filename = (string)nav.Evaluate ("/entry/content/@src");			
 		}
 	}
 }

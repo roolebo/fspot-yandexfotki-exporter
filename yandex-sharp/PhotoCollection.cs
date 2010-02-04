@@ -8,7 +8,7 @@ using System.IO;
 
 namespace Mono.Yandex.Fotki{
 	
-	public class PhotoCollection:IEnumerable {
+	public class PhotoCollection{
 		public string link;
 		private ArrayList photos;
 
@@ -43,6 +43,6 @@ namespace Mono.Yandex.Fotki{
 				            (new XPathDocument 
 				             (iterator.Current.ReadSubtree())));
 			}
-		}		
+		}
 	}
 }

@@ -2,7 +2,8 @@
 using System;
 using System.Xml;
 using System.Xml.XPath;
-using System.Collections;
+using System.IO;
+using System.Text;
 
 namespace Mono.Yandex.Fotki{
 
@@ -14,6 +15,8 @@ namespace Mono.Yandex.Fotki{
 		public bool xxx = false;
 		public bool disable_comments = false;
 		public bool hide_original = false;
+		
+		public Photo () {}
 		
 		public Photo (XPathDocument xml)
 		{
@@ -39,15 +42,19 @@ namespace Mono.Yandex.Fotki{
 		
 		private void ParseXml (XPathDocument doc){			
 			var nav = doc.CreateNavigator ();
+			XmlNamespaceManager mr = new XmlNamespaceManager (nav.NameTable);
+			mr.AddNamespace ("app","http://www.w3.org/2007/app");
+			mr.AddNamespace ("f","yandex:fotki");
+			mr.AddNamespace ("atom","http://www.w3.org/2005/Atom");
 			
-			id = (string)nav.Evaluate("substring-after('/entry/id',':photo:')");
+			id = (string)nav.Evaluate("substring-after('/atom:entry/atom:id',':photo:')",mr);
 			
-			title = (string)nav.Evaluate ("/entry/title");
-			author = (string)nav.Evaluate ("/entry/author/name");
-			xxx = (bool)nav.Evaluate ("boolean(/entry/f:xxx/@value)");
-			hide_original = (bool)nav.Evaluate ("/entry/f:hide_original/@value");
-			disable_comments = (bool)nav.Evaluate ("/entry/f:disable_comments/@value");
-			filename = (string)nav.Evaluate ("/entry/content/@src");			
+			title = (string)nav.Evaluate ("string(/atom:entry/atom:title)",mr);
+			author = (string)nav.Evaluate ("string(/atom:entry/atom:author/atom:name)",mr);
+			xxx = (bool)nav.Evaluate ("boolean(/atom:entry/f:xxx/@value)",mr);
+			hide_original = (bool)nav.Evaluate ("boolean(/atom:entry/f:hide_original/@value)",mr);
+			disable_comments = (bool)nav.Evaluate ("boolean(/atom:entry/f:disable_comments/@value)",mr);
+			filename = (string)nav.Evaluate ("string(/atom:entry/atom:content/@src)",mr);			
 		}
 	}
 }

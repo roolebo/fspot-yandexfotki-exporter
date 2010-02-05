@@ -8,7 +8,7 @@ using System.IO;
 
 namespace Mono.Yandex.Fotki{
 	
-	public class PhotoCollection:IEnumerable<Photo> {
+	public class PhotoCollection{
 		public string link;
 		private ArrayList photos;
 
@@ -24,24 +24,25 @@ namespace Mono.Yandex.Fotki{
 		}
 		*/
 		
-		public IEnumerator<Photo> GetEnumerator ()
+		public IEnumerator GetEnumerator ()
 		{
-			foreach (Photo photo in photos)
-			{
-				yield return photo;
-			}
+			return photos.GetEnumerator();
 		}
 		
 		private void ParseXml (XPathDocument xml)
 		{
 			var nav = xml.CreateNavigator ();
+			var mr = new XmlNamespaceManager (nav.NameTable);
+			mr.AddNamespace ("app","http://www.w3.org/2007/app");
+			mr.AddNamespace ("f","yandex:fotki");
+			mr.AddNamespace ("atom","http://www.w3.org/2005/Atom");
 			
-			var iterator = nav.Select ("//entry");
-			foreach (XPathNodeIterator item in iterator){
-				photos.Add (new Photo (new XPathDocument 
-				                       (new StringReader (item.ToString ()))));
+			XPathNodeIterator iterator = nav.Select ("//atom:entry",mr);
+			while(iterator.MoveNext ()){
+				photos.Add (new Photo 
+				            (new XPathDocument 
+				             (iterator.Current.ReadSubtree())));
 			}
 		}
-		
 	}
 }

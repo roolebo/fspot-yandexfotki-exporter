@@ -37,7 +37,9 @@ namespace Mono.Yandex.Fotki{
 			mr.AddNamespace ("f","yandex:fotki");
 			mr.AddNamespace ("atom","http://www.w3.org/2005/Atom");
 			
-			XPathNodeIterator iterator = nav.Select ("//atom:entry",mr);
+			link = (string)nav.Evaluate ("string(//atom:link[@rel='alternate'][1]/@href)",mr);
+			
+			XPathNodeIterator iterator = nav.Select ("/atom:feed/atom:entry",mr);
 			while(iterator.MoveNext ()){
 				photos.Add (new Photo 
 				            (new XPathDocument 

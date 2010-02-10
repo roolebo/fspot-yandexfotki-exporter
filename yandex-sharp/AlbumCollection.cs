@@ -1,13 +1,12 @@
 using System;
+using System.IO;
+using System.Collections;
 using System.Xml;
 using System.Xml.XPath;
-using System.IO;
-using System.Text;
-using System.Collections;
 
 namespace Mono.Yandex.Fotki {
 
-	public class AlbumCollection:IEnumerable {
+	public class AlbumCollection{
 		public string link;
 		private ArrayList albums;
 		
@@ -19,15 +18,12 @@ namespace Mono.Yandex.Fotki {
 		
 		public void Add (Album album)
 		{
-			RequestMananger.Add (album);
+			//RequestMananger.Add (album);
 		}
 		
-		public IEnumerable GetEnumerator ()
+		public IEnumerator GetEnumerator ()
 		{
-			foreach (Album album in albums)
-			{
-				yield return album;
-			}
+			return albums.GetEnumerator ();
 		}
 		
 		/*
@@ -55,13 +51,16 @@ namespace Mono.Yandex.Fotki {
 		private void ParseXml (XPathDocument doc)
 		{
 			var nav = doc.CreateNavigator ();
+			var mr = new XmlNamespaceManager (nav.NameTable);
+			mr.AddNamespace ("app","http://www.w3.org/2007/app");
+			mr.AddNamespace ("f","yandex:fotki");
+			mr.AddNamespace ("atom","http://www.w3.org/2005/Atom"); 
 			
-			title = (string)nav.Evaluate ("/feed/title");
-			link = (string)nav.Evaluate ("/feed/link[rel='alternative']");
-			var iterator = nav.Select ("/feed/entry");
-			foreach (XPathNodeIterator item in iterator){
-				albums.Add (new Album (new XPathDocument 
-				                       (new StringReader (item))));
+			XPathNodeIterator iterator = nav.Select ("/atom:feed/atom:entry",mr);
+			while(iterator.MoveNext ()){
+				albums.Add (new Album 
+				            (new XPathDocument 
+				             (iterator.Current.ReadSubtree())));
 			}
 		}
 	}

@@ -1,3 +1,26 @@
+//  
+// Mono.Yandex.Fotki.RequestManager.cs: Performs GET, POST, PUT, DELETE requests in convenient way
+//
+// Author:
+//    Roman Bolshakov
+//
+// Copyright (C) 2010 Roman Bolshakov
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//
+
 using System;
 using System.IO;
 using System.Net;
@@ -9,59 +32,93 @@ namespace Mono.Yandex.Fotki {
         class RequestManager {
                 private string token;
                 
-                RequestManager (string username, string password)
+                internal RequestManager (string username, string password)
                 {
                         token = Authentication.GetAuthorizationToken (username, password);
                 }
                 
-                byte[] GetBinary (string uri)
+                internal byte[] GetBinary (string uri)
                 {
-                        HttpWebRequest request = (HttpWebRequest) WebRequest.Create (uri);
+                        HttpWebRequest request = CreateRequest (uri);
+                        request.Method = "GET";
 
                         using (HttpWebResponse response = (HttpWebResponse) request.GetResponse ()) {
-                                //TODO change reading to correct way
-                                //Stream response_stream = response.GetResponseStream ();
-                                //byte[] result = new byte[response_stream.Length];
-                                //response_stream.Read (result, 0, result.Length);
-                                return null;
+                                return StreamHelper.ReadFully (response.GetResponseStream ());
                         }
                 }
 
-                string Get (string uri)
+                internal string Get (string uri)
                 {
                         return Encoding.UTF8.GetString (GetBinary (uri));
                 }
 
-                string PostMultipart (string uri, MultipartData data)
+                internal void Delete (string uri)
+                {
+                        HttpWebRequest request = CreateRequest (uri);
+                        request.Method = "DELETE";
+
+                        using (HttpWebResponse response = (HttpWebResponse) request.GetResponse ()) {
+                                //TODO exception
+                        }
+
+                }
+
+                internal string Put (string uri, IContent content)
+                {
+                        HttpWebRequest request = CreateRequest (uri);
+                        request.Method = "PUT";
+                        request.ContentType = content.Type;
+
+                        Stream content_stream = content.GetStream ();
+                        Stream request_stream = request.GetRequestStream ();
+                        StreamHelper.CopyStream (content_stream, request_stream);
+                        request_stream.Close ();
+                        content_stream.Close ();
+
+                        return WebHelper.GetResponseString (request);
+                }
+
+                internal string Post (string uri, IContent content)
+                {
+                        HttpWebRequest request = CreateRequest (uri);
+                        request.Method = "POST";
+
+                        if (content.Name != null)
+                                request.Headers.Add ("Slug: " + content.Name);
+                        request.ContentType = content.Type;
+
+                        Stream content_stream = content.GetStream ();
+                        Stream request_stream = request.GetRequestStream ();
+                        StreamHelper.CopyStream (content_stream, request_stream);
+                        request_stream.Close ();
+                        content_stream.Close ();
+
+                        return WebHelper.GetResponseString (request);
+                }
+
+                internal string PostMultipart (string uri, MultipartData data)
                 {
                         const string boundary = "AaB03x";
 
-                        HttpWebRequest request = (HttpWebRequest) WebRequest.Create (uri);
+                        HttpWebRequest request = CreateRequest (uri);
                         request.Method = "POST";
-                        request.Headers.Add(@"Authorization: FimpToken realm=""fotki.yandex.ru"", token="""
-                                        + token + @"""");
                         request.ContentType = "multipart/form-data; boundary=" + boundary;
                         Stream content = data.Form (boundary);
                         Stream request_stream = request.GetRequestStream ();
-                        CopyStream(content, request_stream);
+                        StreamHelper.CopyStream(content, request_stream);
                         request_stream.Close ();
                         content.Close ();
 
-                        using (HttpWebResponse response = (HttpWebResponse) request.GetResponse ()) {
-                                Stream response_stream = response.GetResponseStream ();
-                                StreamReader reader = new StreamReader (response_stream);
-                                return reader.ReadToEnd ();
-                        }
+                        return WebHelper.GetResponseString (request);
                 }
-                public static void CopyStream(Stream input, Stream output)
+
+                private HttpWebRequest CreateRequest (string uri)
                 {
-                        byte[] buffer = new byte[32768];
-                        while (true) {
-                                int read = input.Read (buffer, 0, buffer.Length);
-                                if (read <= 0)
-                                        return;
-                                output.Write (buffer, 0, read);
-                        }
+                        HttpWebRequest request = (HttpWebRequest) WebRequest.Create (uri);
+                        if (token != null)
+                                request.Headers.Add (@"Authorization: FimpToken realm=""fotki.yandex.ru"", token="""
+                                                + token + @"""");
+                        return request;
                 }
         }
 } 

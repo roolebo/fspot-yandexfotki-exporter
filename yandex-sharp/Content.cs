@@ -1,5 +1,5 @@
 //  
-// Mono.Yandex.Fotki.Resource.cs: Represents data that are being sent and received
+// Mono.Yandex.Fotki.Content.cs: Represents data that are being sent and received
 //
 // Author:
 //    Roman Bolshakov
@@ -24,9 +24,10 @@
 using System;
 using System.IO;
 using System.Xml;
+using System.Text;
 
 namespace Mono.Yandex.Fotki {
-        interface IContent {
+        internal interface IContent {
                 string Name {
                         get;
                 }
@@ -38,8 +39,8 @@ namespace Mono.Yandex.Fotki {
                 Stream GetStream ();
         }
 
-        class ImageContent: IContent {
-                private file_path;
+        internal class ImageContent: IContent {
+                private string file_path;
 
                 ImageContent (string filePath)
                 {
@@ -48,27 +49,27 @@ namespace Mono.Yandex.Fotki {
                         file_path = filePath;
                 }
 
-                string Name {
+                public string Name {
                         get {
-                                return File.Path.GetFileName (file_path);
+                                return Path.GetFileName (file_path);
                         }
                 }
 
-                string Type {
+                public string Type {
                         get {
                                 return WebHelper.GetMimeType (file_path);
                         }
                 }
 
-                Stream GetStream () 
+                public Stream GetStream () 
                 {
-                        using (FileStream fs = File.Open (file_path, File.Open)) {
+                        using (FileStream fs = File.Open (file_path, FileMode.Open)) {
                                 return fs;
                         }
                 }
         }
 
-        class AtomContent: IContent {
+        internal class AtomContent: IContent {
                 private string type = "application/atom+xml; charset=utf-8; type=entry";
                 private string content;
                 
@@ -77,15 +78,15 @@ namespace Mono.Yandex.Fotki {
                         this.content = content;
                 }
 
-                string Name {
+                public string Name {
                         get { return null; }
                 }
 
-                string Type {
+                public string Type {
                         get { return type; }
                 }
 
-                Stream GetStream ()
+                public Stream GetStream ()
                 {
                         using (MemoryStream ms = new MemoryStream (Encoding.UTF8.GetBytes (content))) {
                                 return ms;

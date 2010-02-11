@@ -23,8 +23,9 @@
 
 using System;
 using System.IO;
+using System.Net;
 
-namespace Moo.Yandex.Fotki {
+namespace Mono.Yandex.Fotki {
         class WebHelper {
                 public static string GetMimeType (string filePath) {
                         string extension = Path.GetExtension (filePath).ToLower ();
@@ -41,4 +42,14 @@ namespace Moo.Yandex.Fotki {
                                 return "application/octet-stream";
                 }
 
+                public static string GetResponseString (HttpWebRequest request)
+                {
+                        using (HttpWebResponse response = (HttpWebResponse) request.GetResponse ()) {
+                                Stream response_stream = response.GetResponseStream ();
+                                StreamReader reader = new StreamReader (response_stream);
+                                return reader.ReadToEnd ();
+                        }
+                }
+
+        }
 }

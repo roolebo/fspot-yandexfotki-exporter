@@ -1,0 +1,3 @@
+The project is aimed to integrate F-Spot photo manager with Yandex.Fotki service.
+Main part is creating of useful and straightforward Mono library for the service. The library must provide all functions that supports by Yandex.Fotki API.
+The second part is exporter from F-Spot to the service.

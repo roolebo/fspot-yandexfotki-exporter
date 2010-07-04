@@ -27,6 +27,7 @@ namespace Mono.Yandex.Fotki {
                 }
                 
                 [Test]
+                [ExpectedException("System.Net.WebException")]
                 public void GetTokenWithoutPassword ()
                 {
                         String token = Authentication.GetAuthorizationToken

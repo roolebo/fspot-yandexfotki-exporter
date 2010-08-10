@@ -32,6 +32,8 @@ namespace Mono.Yandex.Fotki {
         class RequestManager {
                 private string token;
                 
+                internal RequestManager () {}
+
                 internal RequestManager (string username, string password)
                 {
                         token = Authentication.GetAuthorizationToken (username, password);
@@ -47,7 +49,7 @@ namespace Mono.Yandex.Fotki {
                         }
                 }
 
-                internal string Get (string uri)
+                internal string GetString (string uri)
                 {
                         return Encoding.UTF8.GetString (GetBinary (uri));
                 }
@@ -63,38 +65,38 @@ namespace Mono.Yandex.Fotki {
 
                 }
 
-                internal string Put (string uri, IContent content)
-                {
-                        HttpWebRequest request = CreateRequest (uri);
-                        request.Method = "PUT";
-                        request.ContentType = content.Type;
+                //internal string Put (string uri, IContent content)
+                //{
+                //        HttpWebRequest request = CreateRequest (uri);
+                //        request.Method = "PUT";
+                //        request.ContentType = content.Type;
 
-                        Stream content_stream = content.GetStream ();
-                        Stream request_stream = request.GetRequestStream ();
-                        StreamHelper.CopyStream (content_stream, request_stream);
-                        request_stream.Close ();
-                        content_stream.Close ();
+                //        Stream content_stream = content.GetStream ();
+                //        Stream request_stream = request.GetRequestStream ();
+                //        StreamHelper.CopyStream (content_stream, request_stream);
+                //        request_stream.Close ();
+                //        content_stream.Close ();
 
-                        return WebHelper.GetResponseString (request);
-                }
+                //        return WebHelper.GetResponseString (request);
+                //}
 
-                internal string Post (string uri, IContent content)
-                {
-                        HttpWebRequest request = CreateRequest (uri);
-                        request.Method = "POST";
+                //internal string Post (string uri, IContent content)
+                //{
+                //        HttpWebRequest request = CreateRequest (uri);
+                //        request.Method = "POST";
 
-                        if (content.Name != null)
-                                request.Headers.Add ("Slug: " + content.Name);
-                        request.ContentType = content.Type;
+                //        if (content.Name != null)
+                //                request.Headers.Add ("Slug: " + content.Name);
+                //        request.ContentType = content.Type;
 
-                        Stream content_stream = content.GetStream ();
-                        Stream request_stream = request.GetRequestStream ();
-                        StreamHelper.CopyStream (content_stream, request_stream);
-                        request_stream.Close ();
-                        content_stream.Close ();
+                //        Stream content_stream = content.GetStream ();
+                //        Stream request_stream = request.GetRequestStream ();
+                //        StreamHelper.CopyStream (content_stream, request_stream);
+                //        request_stream.Close ();
+                //        content_stream.Close ();
 
-                        return WebHelper.GetResponseString (request);
-                }
+                //        return WebHelper.GetResponseString (request);
+                //}
 
                 internal string PostMultipart (string uri, MultipartData data)
                 {

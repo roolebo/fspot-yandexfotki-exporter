@@ -23,6 +23,7 @@
 using System;
 using System.Text;
 using System.Net;
+using System.Xml;
 using System.Xml.XPath;
 using System.IO;
 using System.Collections.Generic;
@@ -106,40 +107,64 @@ namespace Mono.Yandex.Fotki {
         internal static string GetAuthorizationToken (string username, string password)
         {
             //getting public key
-            System.Net.ServicePointManager.Expect100Continue = false;
-            HttpWebRequest request = (HttpWebRequest) WebRequest.Create (auth_key_uri);
-            HttpWebResponse response = (HttpWebResponse) request.GetResponse ();
-            XPathNavigator navigator = (new XPathDocument (new StreamReader (
-                            response.GetResponseStream ()))).CreateNavigator ();
-            string public_key = (string) navigator.Evaluate ("string(/response/key)");
-            string request_id = (string) navigator.Evaluate ("string(/response/request_id)");
-            response.Close ();
-            
-            //encoding
-            EncryptionProvider encryption_provider = new EncryptionProvider ();
-            encryption_provider.ImportPublicKey (public_key);
-            string credentials = String.Format (@"<credentials login=""{0}"" password=""{1}""/>", username, password);
-            string encoded_credentials = Convert.ToBase64String (encryption_provider.Encrypt 
-                    (new UTF8Encoding ().GetBytes (credentials)));  
-                    
-            //sending encoded data and receiving authorization token
-            request = (HttpWebRequest) WebRequest.Create (auth_token_uri);
-            request.Method = "POST";
-            request.ContentType = "application/x-www-form-urlencoded";
-            byte[] parameters = Encoding.UTF8.GetBytes ("request_id=" +
-                    request_id + "&credentials=" + HttpUtility.UrlEncode(encoded_credentials));
-            
-            Stream request_stream = request.GetRequestStream ();
-            request_stream.Write (parameters, 0, parameters.Length);
-            request_stream.Close ();
+            try {
+                    System.Net.ServicePointManager.Expect100Continue = false;
+                    HttpWebRequest request = (HttpWebRequest) WebRequest.Create (auth_key_uri);
+                    HttpWebResponse response = (HttpWebResponse) request.GetResponse ();
+                    XPathNavigator navigator = (new XPathDocument (new StreamReader (
+                                                    response.GetResponseStream ()))).CreateNavigator ();
+                    string public_key = (string) navigator.Evaluate ("string(/response/key)");
+                    string request_id = (string) navigator.Evaluate ("string(/response/request_id)");
+                    response.Close ();
 
-            response = (HttpWebResponse) request.GetResponse ();
-            navigator = (new XPathDocument (new StreamReader (
-                            response.GetResponseStream ()))).CreateNavigator ();
-            string token = (string) navigator.Evaluate ("string(/response/token)");
-            response.Close ();
+                    //encoding
+                    EncryptionProvider encryption_provider = new EncryptionProvider ();
+                    encryption_provider.ImportPublicKey (public_key);
+                    string credentials = String.Format (@"<credentials login=""{0}"" password=""{1}""/>", username, password);
+                    string encoded_credentials = Convert.ToBase64String (encryption_provider.Encrypt 
+                                    (new UTF8Encoding ().GetBytes (credentials)));  
 
-            return token;
+                    //sending encoded data and receiving authorization token
+                    request = (HttpWebRequest) WebRequest.Create (auth_token_uri);
+                    request.Method = "POST";
+                    request.ContentType = "application/x-www-form-urlencoded";
+                    byte[] parameters = Encoding.UTF8.GetBytes ("request_id=" +
+                                    request_id + "&credentials=" + HttpUtility.UrlEncode(encoded_credentials));
+
+                    Stream request_stream = request.GetRequestStream ();
+                    request_stream.Write (parameters, 0, parameters.Length);
+                    request_stream.Close ();
+
+                    response = (HttpWebResponse) request.GetResponse ();
+                    navigator = (new XPathDocument (new StreamReader (
+                                                    response.GetResponseStream ()))).CreateNavigator ();
+                    string token = (string) navigator.Evaluate ("string(/response/token)");
+                    response.Close ();
+
+                    return token;
+            } catch (WebException exception) {
+                    HttpWebResponse response = (HttpWebResponse) exception.Response;
+
+                    if (response != null) {
+                            string response_text;
+                            HttpStatusCode status_code = response.StatusCode;
+
+                            using (StreamReader reader = new StreamReader (response.GetResponseStream ())) {
+                                    response_text = reader.ReadToEnd ();
+                            }
+
+                            //Process 403 and 400 errors
+                            if (status_code == HttpStatusCode.Forbidden || status_code == HttpStatusCode.BadRequest) {
+                                    XmlDocument document = new XmlDocument ();
+                                    document.LoadXml (response_text);
+                                    XPathNavigator navigator = document.CreateNavigator ();
+                                    string error = (string) navigator.Evaluate ("string(//error)");
+
+                                    throw new AuthenticationFailedException (error);
+                            }
+                    }
+                    throw new ConnectionFailedException (exception.Message);
+            }
         }
     }
 }   

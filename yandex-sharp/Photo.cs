@@ -28,6 +28,9 @@ using System.Text;
 
 namespace Mono.Yandex.Fotki{
 
+        public enum Access {Public, Friends, Private}
+        public enum Size {Original, XL, L, M, S, XS, XXS, XXXS}
+
 	public class Photo {
                 private bool adult_content;
                 private string link_self;
@@ -39,9 +42,6 @@ namespace Mono.Yandex.Fotki{
                 private FotkiService fotki;
 
                 internal string Filepath { get; set; }
-
-                public enum Access {Public, Friends, Private}
-                public enum Size {Original, XL, L, M, S, XS, XXS, XXXS}
 
 		public uint Id { get; private set; }
 		public string Title { get; set; }
@@ -68,7 +68,10 @@ namespace Mono.Yandex.Fotki{
 		public Photo (string filepath) 
                 {
                         Filepath = filepath;
-                        //TODO check whether the file exist
+
+                        if (!File.Exists (filepath)) {
+                                throw new FileNotFoundException ("The file " + filepath + "could not be accessed.");
+                        }
                 }
 		
 		internal Photo (FotkiService fotki, string xml)

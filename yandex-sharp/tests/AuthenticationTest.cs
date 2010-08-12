@@ -27,7 +27,7 @@ namespace Mono.Yandex.Fotki {
                 }
                 
                 [Test]
-                [ExpectedException("Mono.Yandex.Fotki.ConnectionFailedException")]
+                [ExpectedException("Mono.Yandex.Fotki.AuthenticationFailedException")]
                 public void GetTokenWithoutPassword ()
                 {
                         String token = Authentication.GetAuthorizationToken

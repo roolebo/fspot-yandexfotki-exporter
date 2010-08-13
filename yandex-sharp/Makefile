@@ -10,7 +10,8 @@ SOURCES = Authentication.cs		\
 	  WebHelper.cs			\
 	  UserNotFoundException.cs	\
 	  AuthenticationFailedException.cs	\
-	  ConnectionFailedException.cs
+	  ConnectionFailedException.cs	\
+	  tests/PhotoTest.cs
 
 all: FotkiSharp.dll
 

@@ -49,22 +49,23 @@ namespace Mono.Yandex.Fotki{
                 {
                         if (!photos.ContainsKey (index)) {
                                 //TODO add exception
-                                string xml = fotki.Request.GetString (link_self + index.ToString ());
+                                string link_to_photo = link_self + index.ToString () + "/";
+                                string xml = fotki.Request.GetString (link_to_photo);
                                 Photo photo = new Photo (xml);
                                 photos.Add (index, photo);
                         }
 
                         return photos[index];
                 }
-                public string AddPhoto (Photo photo)
+                public uint Add (Photo photo)
                 {
                         MultipartData data = new MultipartData ();
                         data.Add (new MultipartData.Parameter ("image", photo.Filepath, MultipartData.Parameter.ParamType.File));
                         data.Add (new MultipartData.Parameter ("title", photo.Title, MultipartData.Parameter.ParamType.Field));
                         string access;
-                        if (photo.AccessLevel == Photo.Access.Public)
+                        if (photo.AccessLevel == Access.Public)
                                 access = "public";
-                        else if (photo.AccessLevel == Photo.Access.Friends)
+                        else if (photo.AccessLevel == Access.Friends)
                                 access = "friends";
                         else
                                 access = "private";
@@ -89,7 +90,8 @@ namespace Mono.Yandex.Fotki{
                         data.Add (new MultipartData.Parameter ("xxx", xxx, MultipartData.Parameter.ParamType.Field));
 
                         string response = fotki.Request.PostMultipart (post_uri, data);
-                        return (HttpUtility.ParseQueryString (response)) ["image_id"];
+                        return uint.Parse ((HttpUtility.ParseQueryString 
+                                                (response)) ["image_id"]);
                 }
                 public void RemovePhoto (uint index)
                 {

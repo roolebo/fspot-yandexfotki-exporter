@@ -39,6 +39,8 @@ namespace Mono.Yandex.Fotki{
                 private string link_next_page;
                 private string post_uri = "http://api-fotki.yandex.ru/post/";
 
+                public DateTime Updated { get; private set; }
+
 		internal PhotoCollection (FotkiService fotki, string xml)
 		{
                         this.fotki = fotki;
@@ -124,6 +126,8 @@ namespace Mono.Yandex.Fotki{
 			link_self = (string) nav.Evaluate ("string(/atom:feed/atom:link[@rel='self']/@href)", mr);
 			link_next_page = (string) nav.Evaluate ("string(//atom:link[@rel='next']/@href)", mr);
 
+                        string updated = (string) nav.Evaluate ("string(/atom:feed/atom:updated)", mr);
+                        Updated = DateTimeHelper.ConvertRfc3339ToDateTime (updated);
 
 			//XPathNodeIterator iterator = nav.Select ("/atom:feed/atom:entry",mr);
 			//while(iterator.MoveNext ()){

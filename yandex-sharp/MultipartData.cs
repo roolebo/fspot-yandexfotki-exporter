@@ -22,7 +22,6 @@
 //
 
 using System;
-using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
@@ -77,7 +76,6 @@ namespace Mono.Yandex.Fotki {
                         string file_header_template = "--" + boundary + "\r\n"
                                 + @"Content-Disposition: form-data; name=""{0}""; filename=""{1}""" + "\r\n"
                                 + "Content-Type: " + WebHelper.GetMimeType (file_parameter.Value) + "\r\n"
-                                + "Content-Transfer-Encoding: binary\r\n"
                                 + "\r\n";
                         byte[] crlf_bytes = Encoding.UTF8.GetBytes ("\r\n");
 
@@ -87,8 +85,9 @@ namespace Mono.Yandex.Fotki {
                         byte[] file_header_bytes = Encoding.UTF8.GetBytes (file_header);
                         stream.Write (file_header_bytes, 0, file_header_bytes.Length);
 
-                        Image image = Image.FromFile (file_parameter.Value);
-                        image.Save (stream, image.RawFormat);
+                        using (FileStream image = new FileStream (file_parameter.Value, FileMode.Open)) {
+                                StreamHelper.CopyStream (image, stream);
+                        }
                         stream.Write (crlf_bytes, 0, crlf_bytes.Length);
                 }
 

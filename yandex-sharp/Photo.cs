@@ -25,6 +25,7 @@ using System.Xml;
 using System.Xml.XPath;
 using System.IO;
 using System.Text;
+using System.Globalization;
 
 namespace Mono.Yandex.Fotki{
 
@@ -149,14 +150,17 @@ namespace Mono.Yandex.Fotki{
 			AdultContent = bool.Parse ((string) nav.Evaluate ("string(/atom:entry/f:xxx/@value)", mr));
 			HideOriginal = bool.Parse ((string) nav.Evaluate ("string(/atom:entry/f:hide_original/@value)", mr));
 			DisableComments = bool.Parse ((string) nav.Evaluate ("string(/atom:entry/f:disable_comments/@value)", mr));
-                        var temp_date = (string) nav.Evaluate ("string(/atom:entry/f:created", mr);
-                        Created = XmlConvert.ToDateTime (temp_date, "yyyy-MM-ddTHH:mm:ss");
-                        temp_date = (string) nav.Evaluate ("string(/atom:entry/app:edited", mr);
-                        Edited = XmlConvert.ToDateTime (temp_date, "yyyy-MM-ddTHH:mm:ss");
-                        temp_date = (string) nav.Evaluate ("string(/atom:entry/atom:updated", mr);
-                        Updated = XmlConvert.ToDateTime (temp_date, "yyyy-MM-ddTHH:mm:ss");
-                        temp_date = (string) nav.Evaluate ("string(/atom:entry/atom:published", mr);
-                        Published = XmlConvert.ToDateTime (temp_date, "yyyy-MM-ddTHH:mm:ss");
+
+                        string temp_date;
+                        temp_date = (string) nav.Evaluate ("string(/atom:entry/f:created)", mr);
+                        if (!String.IsNullOrEmpty (temp_date))
+                                Created = DateTimeHelper.ConvertRfc3339ToDateTime (temp_date);
+                        temp_date = (string) nav.Evaluate ("string(/atom:entry/app:edited)", mr);
+                        Edited = DateTimeHelper.ConvertRfc3339ToDateTime (temp_date);
+                        temp_date = (string) nav.Evaluate ("string(/atom:entry/atom:updated)", mr);
+                        Updated = DateTimeHelper.ConvertRfc3339ToDateTime (temp_date);
+                        temp_date = (string) nav.Evaluate ("string(/atom:entry/atom:published)", mr);
+                        Published = DateTimeHelper.ConvertRfc3339ToDateTime (temp_date);
 
                         string access = (string) nav.Evaluate ("string(/atom:entry/f:access)", mr);
                         if (access == "public")
@@ -166,12 +170,13 @@ namespace Mono.Yandex.Fotki{
                         else
                                 AccessLevel = Access.Private;
 
-                        link_self = (string) nav.Evaluate ("string(/atom:entry/atom:link[@rel=self]/@href", mr);
-                        link_edit = (string) nav.Evaluate ("string(/atom:entry/atom:link[@rel=edit]/@href", mr);
-                        link_web = (string) nav.Evaluate ("string(/atom:entry/atom:link[@rel=alternate]/@href", mr);
-                        link_album = (string) nav.Evaluate ("string(/atom:entry/atom:link[@rel=album]/@href", mr);
-                        link_edit_media = (string) nav.Evaluate ("string(/atom:entry/atom:link[@rel=edit-media]/@href", mr);
-                        link_content = (string) nav.Evaluate ("string(/atom:entry/atom:content/@src", mr);
+                        link_self = (string) nav.Evaluate ("string(/atom:entry/atom:link[@rel='self']/@href)", mr);
+                        link_edit = (string) nav.Evaluate ("string(/atom:entry/atom:link[@rel='edit']/@href)", mr);
+                        link_web = (string) nav.Evaluate ("string(/atom:entry/atom:link[@rel='alternate']/@href)", mr);
+                        link_album = (string) nav.Evaluate ("string(/atom:entry/atom:link[@rel='album']/@href)", mr);
+                        link_edit_media = (string) nav.Evaluate ("string(/atom:entry/atom:link[@rel='edit-media']/@href)", mr);
+                        link_content = (string) nav.Evaluate ("string(/atom:entry/atom:content/@src)", mr);
 		}
+
 	}
 }

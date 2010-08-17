@@ -1,7 +1,7 @@
 //  
 // Mono.Yandex.Fotki.PhotoCollection.cs: access to collection of all photos
 //
-// Author:
+// Authors:
 //    Maxim Kolchin, Roman Bolshakov
 //
 // Copyright (C) 2010 Maxim Kolchin
@@ -31,9 +31,10 @@ using System.Web;
 
 namespace Mono.Yandex.Fotki{
 	
-	public class PhotoCollection {
+	public class PhotoCollection : IEnumerable<Photo> {
 		private Dictionary<uint, Photo> photos;
                 private FotkiService fotki;
+                private string xml;
                 private string link_self;
                 private string link_next_page;
                 private string post_uri = "http://api-fotki.yandex.ru/post/";
@@ -42,6 +43,7 @@ namespace Mono.Yandex.Fotki{
 		{
                         this.fotki = fotki;
 			photos = new Dictionary<uint, Photo> ();
+                        this.xml = xml;
 			ParseXml (xml);
 		}
 
@@ -98,10 +100,16 @@ namespace Mono.Yandex.Fotki{
                         //TODO add exception
                         fotki.Request.Delete (link_self + index.ToString ());
                 }
-		//public IEnumerator GetEnumerator ()
-		//{
-		//	return photos.GetEnumerator();
-		//}
+
+		public IEnumerator<Photo> GetEnumerator ()
+		{
+			return new PhotoCollectionEnumerator (this);
+		}
+
+                IEnumerator IEnumerable.GetEnumerator ()
+                {
+                        return GetEnumerator ();
+                }
 		
 		private void ParseXml (string xml)
 		{
@@ -114,7 +122,9 @@ namespace Mono.Yandex.Fotki{
 			mr.AddNamespace ("atom","http://www.w3.org/2005/Atom");
 			
 			link_self = (string) nav.Evaluate ("string(/atom:feed/atom:link[@rel='self']/@href)", mr);
-			
+			link_next_page = (string) nav.Evaluate ("string(//atom:link[@rel='next']/@href)", mr);
+
+
 			//XPathNodeIterator iterator = nav.Select ("/atom:feed/atom:entry",mr);
 			//while(iterator.MoveNext ()){
 			//	photos.Add (new Photo 
@@ -122,5 +132,97 @@ namespace Mono.Yandex.Fotki{
 			//	             (iterator.Current.ReadSubtree())));
 			//}
 		}
+
+                class PhotoCollectionEnumerator : IEnumerator<Photo> {
+                        private PhotoCollection photo_collection;
+                        private XmlDocument document;
+                        private XmlNamespaceManager manager;
+                        private XPathNavigator navigator;
+                        private XPathNodeIterator iterator;
+                        private XPathExpression entry_expression;
+                        private XPathExpression next_page_expression;
+                        private Photo current;
+                        private string link_next_page;
+
+                        public PhotoCollectionEnumerator (PhotoCollection photo_collection)
+                        {
+                                this.photo_collection = photo_collection;
+                                document = new XmlDocument ();
+
+                                entry_expression = XPathExpression.Compile (
+                                                "/atom:feed/atom:entry");
+                                next_page_expression = XPathExpression.Compile (
+                                                "string(/atom:feed/atom:link[@rel='next']/@href)");
+
+                                LoadXml (photo_collection.xml);
+                                link_next_page = photo_collection.link_next_page;
+                        }
+
+                        public bool MoveNext ()
+                        {
+                                bool res = iterator.MoveNext ();
+                                if (res == false && !String.IsNullOrEmpty (link_next_page)) {
+                                        string next_page = photo_collection.fotki.Request.GetString (link_next_page);
+                                        LoadXml (next_page);
+                                        link_next_page = GetNextPageUrl ();
+                                        //move to entry on newly loaded page
+                                        res = iterator.MoveNext ();
+                                }
+
+                                if (res == true)
+                                        current = new Photo (photo_collection.fotki,
+                                                        iterator.Current.OuterXml);
+                                else
+                                        current = null;
+
+                                return res;
+                        }
+
+                        public void Reset ()
+                        {
+                                LoadXml (photo_collection.xml);
+                                link_next_page = photo_collection.link_next_page;
+                                current = null;
+                        }
+
+                        public void Dispose ()
+                        {
+                        }
+
+                        public Photo Current {
+                                get {
+                                        if (current == null)
+                                                throw new InvalidOperationException ();
+                                        return current;
+                                }
+                        }
+
+                        object IEnumerator.Current {
+                                get {
+                                        return Current;
+                                }
+                        }
+
+                        string GetNextPageUrl ()
+                        {
+                                return (string) navigator.Evaluate ("string(//atom:link[@rel='next']/@href)", manager);
+                        }
+
+                        void LoadXml (string xml)
+                        {
+                                document.LoadXml (xml);
+                                navigator = document.CreateNavigator ();
+
+                                manager = new XmlNamespaceManager (navigator.NameTable);
+                                manager.AddNamespace ("app","http://www.w3.org/2007/app");
+                                manager.AddNamespace ("f","yandex:fotki");
+                                manager.AddNamespace ("atom","http://www.w3.org/2005/Atom");
+
+                                entry_expression.SetContext (manager);
+                                next_page_expression.SetContext (manager);
+
+                                iterator = navigator.Select (entry_expression);
+                        }
+                }
 	}
 }

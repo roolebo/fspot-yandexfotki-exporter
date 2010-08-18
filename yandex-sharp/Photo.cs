@@ -40,6 +40,7 @@ namespace Mono.Yandex.Fotki{
                 private string link_edit_media;
                 private string link_album;
                 private string link_content;
+                private string real_id;
                 private FotkiService fotki;
 
                 internal string Filepath { get; set; }
@@ -122,11 +123,12 @@ namespace Mono.Yandex.Fotki{
 			return fotki.Request.GetBinary (link);
 		}
 		
-		/*public void Update ()
+		public void Update ()
 		{
-			RequestManager.Edit (this);
+                        string response;
+			response = fotki.Request.PutAtomEntry (link_edit, BuildXml ());
+                        InitPhoto (response);
 		}
-		*/
 
                 //internal string FormXmlDocument ()
                 //{
@@ -143,6 +145,7 @@ namespace Mono.Yandex.Fotki{
 			mr.AddNamespace ("f","yandex:fotki");
 			mr.AddNamespace ("atom","http://www.w3.org/2005/Atom");
 			
+                        real_id = (string) nav.Evaluate ("string(/atom:entry/atom:id)", mr);
 			Id = UInt32.Parse((string) nav.Evaluate ("substring-after(/atom:entry/atom:id,':photo:')", mr));
 			
 			Title = (string) nav.Evaluate ("string(/atom:entry/atom:title)", mr);
@@ -162,7 +165,7 @@ namespace Mono.Yandex.Fotki{
                         temp_date = (string) nav.Evaluate ("string(/atom:entry/atom:published)", mr);
                         Published = DateTimeHelper.ConvertRfc3339ToDateTime (temp_date);
 
-                        string access = (string) nav.Evaluate ("string(/atom:entry/f:access)", mr);
+                        string access = (string) nav.Evaluate ("string(/atom:entry/f:access/@value)", mr);
                         if (access == "public")
                                 AccessLevel = Access.Public;
                         else if (access == "friends")
@@ -178,5 +181,98 @@ namespace Mono.Yandex.Fotki{
                         link_content = (string) nav.Evaluate ("string(/atom:entry/atom:content/@src)", mr);
 		}
 
+                internal static string ToString (Access access)
+                {
+                        if (access == Access.Public)
+                                return "public";
+                        else if (access == Access.Friends)
+                                return "friends";
+                        else
+                                return "private";
+                }
+
+                private string BuildXml ()
+                {
+                        XmlWriterSettings settings = new XmlWriterSettings ();
+                        settings.Indent = true;
+                        settings.OmitXmlDeclaration = true;
+                        StringBuilder sb = new StringBuilder ();
+
+                        XmlWriter writer = XmlWriter.Create (sb, settings);
+                        writer.WriteStartElement ("entry");
+                        writer.WriteAttributeString ("xmlns", "http://www.w3.org/2005/Atom");
+                        writer.WriteAttributeString ("xmlns:app", "http://www.w3.org/2007/app");
+                        writer.WriteAttributeString ("xmlns:f", "yandex:fotki");
+
+                        writer.WriteElementString ("id", real_id);
+
+                        writer.WriteStartElement ("author");
+                        writer.WriteElementString ("name", Author);
+                        writer.WriteEndElement ();
+
+                        writer.WriteElementString ("title", Title);
+
+                        writer.WriteStartElement ("link");
+                        writer.WriteAttributeString ("href", link_self);
+                        writer.WriteAttributeString ("rel", "self");
+                        writer.WriteEndElement ();
+
+                        writer.WriteStartElement ("link");
+                        writer.WriteAttributeString ("href", link_edit);
+                        writer.WriteAttributeString ("rel", "edit");
+                        writer.WriteEndElement ();
+
+                        writer.WriteStartElement ("link");
+                        writer.WriteAttributeString ("href", link_web);
+                        writer.WriteAttributeString ("rel", "alternate");
+                        writer.WriteEndElement ();
+
+                        writer.WriteStartElement ("link");
+                        writer.WriteAttributeString ("href", link_edit_media);
+                        writer.WriteAttributeString ("rel", "edit-media");
+                        writer.WriteEndElement ();
+
+                        writer.WriteStartElement ("link");
+                        writer.WriteAttributeString ("href", link_album);
+                        writer.WriteAttributeString ("rel", "album");
+                        writer.WriteEndElement ();
+
+                        writer.WriteElementString ("published",
+                                        DateTimeHelper.ConvertDateTimeToRfc3339 (Published));
+                        writer.WriteElementString ("app:edited",
+                                        DateTimeHelper.ConvertDateTimeToRfc3339 (Edited));
+                        writer.WriteElementString ("updated",
+                                        DateTimeHelper.ConvertDateTimeToRfc3339 (Updated));
+                        if (Created != DateTime.MinValue)
+                                writer.WriteElementString ("f:created",
+                                                DateTimeHelper.ConvertDateTimeToRfc3339 (Created));
+
+                        writer.WriteStartElement ("f:access");
+                        writer.WriteAttributeString ("value", ToString (AccessLevel));
+                        writer.WriteEndElement ();
+
+                        writer.WriteStartElement ("f:xxx");
+                        writer.WriteAttributeString ("value", AdultContent.ToString ().ToLower ());
+                        writer.WriteEndElement ();
+
+                        writer.WriteStartElement ("f:hide_original");
+                        writer.WriteAttributeString ("value", HideOriginal.ToString ().ToLower ());
+                        writer.WriteEndElement ();
+
+                        writer.WriteStartElement ("f:disable_comments");
+                        writer.WriteAttributeString ("value", DisableComments.ToString ().ToLower ());
+                        writer.WriteEndElement ();
+
+                        writer.WriteStartElement ("content");
+                        writer.WriteAttributeString ("src", link_content);
+                        writer.WriteAttributeString ("type", "image/*");
+                        writer.WriteEndElement ();
+
+                        writer.WriteEndElement ();
+
+                        writer.Close ();
+
+                        return sb.ToString ();
+                }
 	}
 }

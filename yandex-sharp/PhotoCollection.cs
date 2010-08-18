@@ -38,6 +38,7 @@ namespace Mono.Yandex.Fotki{
                 private string link_self;
                 private string link_next_page;
                 private string post_uri = "http://api-fotki.yandex.ru/post/";
+                private string photo_url_prefix;
 
                 public DateTime Updated { get; private set; }
 
@@ -49,53 +50,37 @@ namespace Mono.Yandex.Fotki{
 			ParseXml (xml);
 		}
 
-                public Photo GetPhoto (uint index)
+                Photo GetPhoto (uint index)
                 {
-                        if (!photos.ContainsKey (index)) {
-                                //TODO add exception
-                                string link_to_photo = link_self + index.ToString () + "/";
-                                string xml = fotki.Request.GetString (link_to_photo);
-                                Photo photo = new Photo (xml);
-                                photos.Add (index, photo);
-                        }
+                        //TODO add exception
+                        string link_to_photo = photo_url_prefix + index.ToString () + "/";
+                        string xml = fotki.Request.GetString (link_to_photo);
+                        Photo photo = new Photo (fotki, xml);
 
-                        return photos[index];
+                        return photo;
                 }
-                public uint Add (Photo photo)
+
+                public Photo Add (Photo photo)
                 {
                         MultipartData data = new MultipartData ();
-                        data.Add (new MultipartData.Parameter ("image", photo.Filepath, MultipartData.Parameter.ParamType.File));
-                        data.Add (new MultipartData.Parameter ("title", photo.Title, MultipartData.Parameter.ParamType.Field));
-                        string access;
-                        if (photo.AccessLevel == Access.Public)
-                                access = "public";
-                        else if (photo.AccessLevel == Access.Friends)
-                                access = "friends";
-                        else
-                                access = "private";
-                        data.Add (new MultipartData.Parameter ("access_type", access, MultipartData.Parameter.ParamType.Field));
-                        string disable_comments;
-                        if (photo.DisableComments == true)
-                                disable_comments = "true";
-                        else
-                                disable_comments = "false";
-                        data.Add (new MultipartData.Parameter ("disable_comments", disable_comments, MultipartData.Parameter.ParamType.Field));
-                        string hide_original;
-                        if (photo.HideOriginal == true)
-                                hide_original = "true";
-                        else
-                                hide_original = "false";
-                        data.Add (new MultipartData.Parameter ("hide_orignal", hide_original, MultipartData.Parameter.ParamType.Field));
-                        string xxx;
-                        if (photo.AdultContent == true)
-                                xxx = "true";
-                        else
-                                xxx = "false";
-                        data.Add (new MultipartData.Parameter ("xxx", xxx, MultipartData.Parameter.ParamType.Field));
+                        data.Add (new MultipartData.Parameter ("image", photo.Filepath,
+                                                MultipartData.Parameter.ParamType.File));
+                        data.Add (new MultipartData.Parameter ("title", photo.Title,
+                                                MultipartData.Parameter.ParamType.Field));
+                        data.Add (new MultipartData.Parameter ("access_type", Photo.ToString (photo.AccessLevel),
+                                                MultipartData.Parameter.ParamType.Field));
+                        data.Add (new MultipartData.Parameter ("disable_comments",
+                                                photo.DisableComments.ToString ().ToLower (),
+                                                MultipartData.Parameter.ParamType.Field));
+                        data.Add (new MultipartData.Parameter ("hide_orignal",
+                                                photo.HideOriginal.ToString ().ToLower (),
+                                                MultipartData.Parameter.ParamType.Field));
+                        data.Add (new MultipartData.Parameter ("xxx", photo.AdultContent.ToString ().ToLower (),
+                                                MultipartData.Parameter.ParamType.Field));
 
                         string response = fotki.Request.PostMultipart (post_uri, data);
-                        return uint.Parse ((HttpUtility.ParseQueryString 
-                                                (response)) ["image_id"]);
+                        return GetPhoto (uint.Parse ((HttpUtility.ParseQueryString
+                                                (response)) ["image_id"]));
                 }
                 public void RemovePhoto (uint index)
                 {
@@ -129,12 +114,7 @@ namespace Mono.Yandex.Fotki{
                         string updated = (string) nav.Evaluate ("string(/atom:feed/atom:updated)", mr);
                         Updated = DateTimeHelper.ConvertRfc3339ToDateTime (updated);
 
-			//XPathNodeIterator iterator = nav.Select ("/atom:feed/atom:entry",mr);
-			//while(iterator.MoveNext ()){
-			//	photos.Add (new Photo 
-			//	            (new XPathDocument 
-			//	             (iterator.Current.ReadSubtree())));
-			//}
+                        photo_url_prefix = link_self.Substring (0, link_self.Length - 2) + "/";
 		}
 
                 class PhotoCollectionEnumerator : IEnumerator<Photo> {

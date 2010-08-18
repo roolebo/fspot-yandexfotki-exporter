@@ -25,16 +25,29 @@ using System.Globalization;
 
 namespace Mono.Yandex.Fotki {
         class DateTimeHelper {
-                internal static DateTime ConvertRfc3339ToDateTime(string datetime)
-                {
-                        string[] date_format = {"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'",
+                static string[] date_format = {"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'",
                                 "yyyy'-'MM'-'dd'T'HH':'mm':'ss"};
-                        if (datetime.EndsWith ("Z"))
-                                return DateTime.ParseExact (datetime, date_format[0], 
-                                                null, DateTimeStyles.AssumeUniversal);
+
+                internal static DateTime ConvertRfc3339ToDateTime (string datetime)
+                {
+                        DateTime result;
+                        if (datetime.EndsWith ("Z")) {
+                                result = DateTime.ParseExact (datetime, date_format[0], 
+                                                null);
+                                result = DateTime.SpecifyKind (result, DateTimeKind.Utc);
+                                return result;
+                        }
                         else
                                 return DateTime.ParseExact (datetime, date_format[1], 
                                                 null);
+                }
+
+                internal static string ConvertDateTimeToRfc3339 (DateTime datetime)
+                {
+                        if (datetime.Kind == DateTimeKind.Utc)
+                                return datetime.ToString (date_format [0]);
+                        else
+                                return datetime.ToString (date_format [1]);
                 }
         }
 }

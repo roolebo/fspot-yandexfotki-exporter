@@ -65,20 +65,20 @@ namespace Mono.Yandex.Fotki {
 
                 }
 
-                //internal string Put (string uri, IContent content)
-                //{
-                //        HttpWebRequest request = CreateRequest (uri);
-                //        request.Method = "PUT";
-                //        request.ContentType = content.Type;
+                internal string PutAtomEntry (string uri, string xml)
+                {
+                        HttpWebRequest request = CreateRequest (uri);
+                        request.Method = "PUT";
+                        request.ContentType = "application/atom+xml; charset=utf-8; type=entry";
 
-                //        Stream content_stream = content.GetStream ();
-                //        Stream request_stream = request.GetRequestStream ();
-                //        StreamHelper.CopyStream (content_stream, request_stream);
-                //        request_stream.Close ();
-                //        content_stream.Close ();
+                        byte [] xml_bytes = Encoding.UTF8.GetBytes (xml);
 
-                //        return WebHelper.GetResponseString (request);
-                //}
+                        using (Stream request_stream = request.GetRequestStream ()) {
+                                request_stream.Write (xml_bytes, 0, xml_bytes.Length);
+                        }
+
+                        return WebHelper.GetResponseString (request);
+                }
 
                 //internal string Post (string uri, IContent content)
                 //{

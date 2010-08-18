@@ -11,12 +11,28 @@ SOURCES = Authentication.cs		\
 	  UserNotFoundException.cs	\
 	  AuthenticationFailedException.cs	\
 	  ConnectionFailedException.cs	\
-	  tests/PhotoTest.cs
+	  tests/PhotoTest.cs		\
+	  DateTimeHelper.cs		\
+	  tests/PhotoCollectionTest.cs
 
-all: FotkiSharp.dll
+PHOTO_COLLECTION_TEST_SOURCES = Authentication.cs	\
+				RequestManager.cs	\
+				AuthenticationFailedException.cs	\
+				ConnectionFailedException.cs	\
+				UserNotFoundException.cs	\
+				MultipartData.cs	\
+				WebHelper.cs			\
+				StreamHelper.cs			\
+				tests/DownloadWholePhotoCollection.cs
+
+
+all: FotkiSharp.dll DownloadWholePhotoCollection.exe
 
 FotkiSharp.dll: $(SOURCES)
-	gmcs -pkg:nunit -t:library -r:Mono.Security.dll,System.Web.dll,System.Drawing.dll -out:bin/$@ $^
+	gmcs -pkg:nunit -t:library -r:Mono.Security.dll,System.Web.dll -out:bin/$@ $^
+
+DownloadWholePhotoCollection.exe : $(PHOTO_COLLECTION_TEST_SOURCES) 
+	gmcs -t:exe -r:Mono.Security.dll,System.Web.dll -out:bin/$@ $^
 
 clean:
 	rm -rf FotkiSharp.dll

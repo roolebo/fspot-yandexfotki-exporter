@@ -26,76 +26,76 @@ namespace Mono.Yandex.Fotki {
                 [Test]
                 public void AddOnlyImage ()
                 {
-                        uint response;
+                        Photo response;
                         Photo test_photo = new Photo ("testimg.jpg");
                         response = photos.Add (test_photo);
-                        Assert.AreNotEqual (response, 0);
+                        Assert.AreNotEqual (response, null);
                 }
 
                 [Test]
                 public void AddWithTitle ()
                 {
-                        uint response;
+                        Photo response;
                         Photo test_photo = new Photo ("testimg.jpg");
                         test_photo.Title = "Рябина под крышей";
                         response = photos.Add (test_photo);
-                        Assert.AreNotEqual (response, 0);
+                        Assert.AreNotEqual (response, null);
                 }
 
                 [Test]
                 public void AddWithDisabledComments ()
                 {
-                        uint response;
+                        Photo response;
                         Photo test_photo = new Photo ("testimg.jpg");
                         test_photo.DisableComments = true;
                         response = photos.Add (test_photo);
-                        Assert.AreNotEqual (response, 0);
+                        Assert.AreNotEqual (response, null);
                 }
 
                 [Test]
                 public void AddWithHiddenOriginal ()
                 {
-                        uint response;
+                        Photo response;
                         Photo test_photo = new Photo ("testimg.jpg");
                         test_photo.HideOriginal = true;
                         response = photos.Add (test_photo);
-                        Assert.AreNotEqual (response, 0);
+                        Assert.AreNotEqual (response, null);
                 }
 
                 [Test]
                 public void AddWithAdultContent ()
                 {
-                        uint response;
+                        Photo response;
                         Photo test_photo = new Photo ("testimg.jpg");
                         test_photo.AdultContent = true;
                         response = photos.Add (test_photo);
-                        Assert.AreNotEqual (response, 0);
+                        Assert.AreNotEqual (response, null);
                 }
 
                 [Test]
                 public void AddForFriends ()
                 {
-                        uint response;
+                        Photo response;
                         Photo test_photo = new Photo ("testimg.jpg");
                         test_photo.AccessLevel = Access.Friends;
                         response = photos.Add (test_photo);
-                        Assert.AreNotEqual (response, 0);
+                        Assert.AreNotEqual (response, null);
                 }
 
                 [Test]
                 public void AddForMyself ()
                 {
-                        uint response;
+                        Photo response;
                         Photo test_photo = new Photo ("testimg.jpg");
                         test_photo.AccessLevel = Access.Private;
                         response = photos.Add (test_photo);
-                        Assert.AreNotEqual (response, 0);
+                        Assert.AreNotEqual (response, null);
                 }
 
                 [Test]
                 public void AddWithAllProperties ()
                 {
-                        uint response;
+                        Photo response;
                         Photo test_photo = new Photo ("testimg.jpg");
                         test_photo.Title = "Рябина под крышей";
                         test_photo.AccessLevel = Access.Private;
@@ -103,7 +103,17 @@ namespace Mono.Yandex.Fotki {
                         test_photo.HideOriginal = true;
                         test_photo.DisableComments = true;
                         response = photos.Add (test_photo);
-                        Assert.AreNotEqual (response, 0);
+                        Assert.AreNotEqual (response, null);
                 }
+
+                [Test]
+                public void UpdateTitle ()
+                {
+                        Photo test_photo = new Photo ("testimg.jpg");
+                        test_photo = photos.Add (test_photo);
+                        test_photo.Title = "Изменённое название";
+                        test_photo.Update ();
+                }
+
         }
 }

@@ -29,9 +29,43 @@ using System.Text;
 using System.Collections.Generic;
 //TODO exception handling
 namespace Mono.Yandex.Fotki {
+        enum RequestMethod {PostMultipart, GetBinary};
+
+        class RequestCompletedEventArgs : EventArgs {
+                internal RequestMethod RequestMethod { get; private set; }
+
+                internal RequestCompletedEventArgs (RequestMethod requestMethod)
+                {
+                        RequestMethod = requestMethod;
+                }
+        }
+
+        class RequestProgressChangedEventArgs : EventArgs {
+                internal RequestMethod RequestMethod { get; private set; }
+                internal long BytesTransferred { get; private set; }
+                internal long TotalBytesToTranfer { get; private set; }
+
+                internal RequestProgressChangedEventArgs (RequestMethod requestMethod, 
+                                long bytesTransferred, long totalBytesToTransfer)
+                {
+                        RequestMethod = requestMethod;
+                        BytesTransferred = bytesTransferred;
+                        TotalBytesToTranfer = totalBytesToTransfer;
+                }
+        }
+
+        delegate void RequestCompletedEventHandler (object sender, 
+                        RequestCompletedEventArgs args);
+
+        delegate void RequestProgressChangedEventHandler (object sender, 
+                        RequestProgressChangedEventArgs args);
+
         class RequestManager {
                 private string token;
-                
+
+                internal event RequestCompletedEventHandler RequestCompleted;
+                internal event RequestProgressChangedEventHandler RequestProgressChanged; 
+
                 internal RequestManager () {}
 
                 internal RequestManager (string username, string password)
@@ -121,6 +155,18 @@ namespace Mono.Yandex.Fotki {
                                 request.Headers.Add (@"Authorization: FimpToken realm=""fotki.yandex.ru"", token="""
                                                 + token + @"""");
                         return request;
+                }
+
+                private void OnRequestCompleted (RequestCompletedEventArgs args)
+                {
+                        if (RequestCompleted != null)
+                                RequestCompleted (this, args);
+                }
+
+                private void OnRequestProgressChanged (RequestProgressChangedEventArgs args)
+                {
+                        if (RequestProgressChanged != null)
+                              RequestProgressChanged (this, args);
                 }
         }
 } 

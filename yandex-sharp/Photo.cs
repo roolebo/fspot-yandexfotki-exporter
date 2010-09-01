@@ -90,37 +90,8 @@ namespace Mono.Yandex.Fotki{
 		
 		public byte[] Download (Size photoSize)
 		{
-                        string suffix = "XL";
-                        switch (photoSize) {
-                                case Size.Original:
-                                        suffix = "orig";
-                                        break;
-                                case Size.XL:
-                                        suffix = "XL";
-                                        break;
-                                case Size.L:
-                                        suffix = "L";
-                                        break;
-                                case Size.M:
-                                        suffix = "M";
-                                        break;
-                                case Size.S:
-                                        suffix = "S";
-                                        break;
-                                case Size.XS:
-                                        suffix = "XS";
-                                        break;
-                                case Size.XXS:
-                                        suffix = "XXS";
-                                        break;
-                                case Size.XXXS:
-                                        suffix = "XXXS";
-                                        break;
-                        }
-
-                        int last_underscore_position = link_content.LastIndexOf ('_');
-                        string link = link_content.Substring(0, last_underscore_position) + suffix;
-			return fotki.Request.GetBinary (link);
+                        string url = GetPhotoUrlWithSpecifiedSize (photoSize);
+			return fotki.Request.GetBinary (url);
 		}
 		
 		public void Update ()
@@ -180,6 +151,49 @@ namespace Mono.Yandex.Fotki{
                         link_edit_media = (string) nav.Evaluate ("string(/atom:entry/atom:link[@rel='edit-media']/@href)", mr);
                         link_content = (string) nav.Evaluate ("string(/atom:entry/atom:content/@src)", mr);
 		}
+
+                private string GetSuffixFromPhotoSize (Size photoSize)
+                {
+                        string suffix = string.Empty;
+                        switch (photoSize) {
+                                case Size.Original:
+                                        suffix = "orig";
+                                        break;
+                                case Size.XL:
+                                        suffix = "XL";
+                                        break;
+                                case Size.L:
+                                        suffix = "L";
+                                        break;
+                                case Size.M:
+                                        suffix = "M";
+                                        break;
+                                case Size.S:
+                                        suffix = "S";
+                                        break;
+                                case Size.XS:
+                                        suffix = "XS";
+                                        break;
+                                case Size.XXS:
+                                        suffix = "XXS";
+                                        break;
+                                case Size.XXXS:
+                                        suffix = "XXXS";
+                                        break;
+                        }
+
+                        return suffix;
+                }
+
+                private string GetPhotoUrlWithSpecifiedSize (Size photoSize)
+                {
+                        string suffix;
+                        suffix = GetSuffixFromPhotoSize (photoSize);
+
+                        int last_underscore_position = link_content.LastIndexOf ('_');
+                        return link_content.Substring(0,
+                                        last_underscore_position) + "_" + suffix;
+                }
 
                 internal static string ToString (Access access)
                 {

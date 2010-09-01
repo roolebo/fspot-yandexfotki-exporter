@@ -1,4 +1,4 @@
-//  
+//
 // Mono.Yandex.Fotki.PhotoCollection.cs: access to collection of all photos
 //
 // Authors:
@@ -29,8 +29,7 @@ using System.Xml.XPath;
 using System.IO;
 using System.Web;
 
-namespace Mono.Yandex.Fotki{
-	
+namespace Mono.Yandex.Fotki {
 	public class PhotoCollection : IEnumerable<Photo> {
 		private Dictionary<uint, Photo> photos;
                 private FotkiService fotki;
@@ -62,26 +61,13 @@ namespace Mono.Yandex.Fotki{
 
                 public Photo Add (Photo photo)
                 {
-                        MultipartData data = new MultipartData ();
-                        data.Add (new MultipartData.Parameter ("image", photo.Filepath,
-                                                MultipartData.Parameter.ParamType.File));
-                        data.Add (new MultipartData.Parameter ("title", photo.Title,
-                                                MultipartData.Parameter.ParamType.Field));
-                        data.Add (new MultipartData.Parameter ("access_type", Photo.ToString (photo.AccessLevel),
-                                                MultipartData.Parameter.ParamType.Field));
-                        data.Add (new MultipartData.Parameter ("disable_comments",
-                                                photo.DisableComments.ToString ().ToLower (),
-                                                MultipartData.Parameter.ParamType.Field));
-                        data.Add (new MultipartData.Parameter ("hide_orignal",
-                                                photo.HideOriginal.ToString ().ToLower (),
-                                                MultipartData.Parameter.ParamType.Field));
-                        data.Add (new MultipartData.Parameter ("xxx", photo.AdultContent.ToString ().ToLower (),
-                                                MultipartData.Parameter.ParamType.Field));
+                        MultipartData data = BuildMultipartData (photo);
 
                         string response = fotki.Request.PostMultipart (post_uri, data);
                         return GetPhoto (uint.Parse ((HttpUtility.ParseQueryString
                                                 (response)) ["image_id"]));
                 }
+
                 public void RemovePhoto (uint index)
                 {
                         //TODO add exception
@@ -116,6 +102,27 @@ namespace Mono.Yandex.Fotki{
 
                         photo_url_prefix = link_self.Substring (0, link_self.Length - 2) + "/";
 		}
+
+                private MultipartData BuildMultipartData (Photo photo)
+                {
+                        MultipartData data = new MultipartData ();
+                        data.Add (new MultipartData.Parameter ("image", photo.Filepath,
+                                                MultipartData.Parameter.ParamType.File));
+                        data.Add (new MultipartData.Parameter ("title", photo.Title,
+                                                MultipartData.Parameter.ParamType.Field));
+                        data.Add (new MultipartData.Parameter ("access_type", Photo.ToString (photo.AccessLevel),
+                                                MultipartData.Parameter.ParamType.Field));
+                        data.Add (new MultipartData.Parameter ("disable_comments",
+                                                photo.DisableComments.ToString ().ToLower (),
+                                                MultipartData.Parameter.ParamType.Field));
+                        data.Add (new MultipartData.Parameter ("hide_orignal",
+                                                photo.HideOriginal.ToString ().ToLower (),
+                                                MultipartData.Parameter.ParamType.Field));
+                        data.Add (new MultipartData.Parameter ("xxx", 
+                                                photo.AdultContent.ToString ().ToLower (),
+                                                MultipartData.Parameter.ParamType.Field));
+                        return data;
+                }
 
                 class PhotoCollectionEnumerator : IEnumerator<Photo> {
                         private PhotoCollection photo_collection;

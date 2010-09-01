@@ -27,8 +27,8 @@ using System.Xml;
 using System.Xml.XPath;
 using System.Net;
 
-namespace Mono.Yandex.Fotki{
-	public class FotkiService{
+namespace Mono.Yandex.Fotki {
+	public class FotkiService {
 		private string user;
 		private PhotoCollection photos;
 		//private AlbumCollection albums;
@@ -38,11 +38,20 @@ namespace Mono.Yandex.Fotki{
                         "http://api-fotki.yandex.ru/api/users/";
                 private RequestManager request_manager;
 
+                public event DownloadPhotoProgressChangedEventHandler
+                        DownloadPhotoProgressChanged;
+                public event DownloadPhotoCompletedEventHandler DownloadPhotoCompleted;
+                public event UploadPhotoCompletedEventHandler UploadPhotoCompleted;
+                public event UploadPhotoProgressChangedEventHandler
+                        UploadPhotoProgressChanged;
+
 		public FotkiService (string user)
 		{
                         link_service_document += user + "/";
 
                         request_manager = new RequestManager ();
+                        request_manager.RequestProgressChanged +=
+                                WhenRequestProgressChanged;
                         try {
                                 string service_document = 
                                 request_manager.GetString (link_service_document);
@@ -68,6 +77,8 @@ namespace Mono.Yandex.Fotki{
 		public FotkiService (string user, string password) : this(user)
 		{
                         request_manager = new RequestManager (user, password);
+                        request_manager.RequestProgressChanged +=
+                                WhenRequestProgressChanged;
 		}
 		
                 public PhotoCollection GetPhotos ()
@@ -108,6 +119,47 @@ namespace Mono.Yandex.Fotki{
                         get {
                                 return request_manager;
                         }
+                }
+
+                internal void OnUploadPhotoCompleted (UploadPhotoCompletedEventArgs args)
+                {
+                        if (UploadPhotoCompleted != null)
+                                UploadPhotoCompleted (this, args);
+                }
+
+                internal void OnUploadPhotoProgressChanged (
+                                UploadPhotoProgressChangedEventArgs args)
+                {
+                        if (UploadPhotoProgressChanged != null)
+                                UploadPhotoProgressChanged (this, args);
+                }
+
+                internal void OnDownloadPhotoCompleted (DownloadPhotoCompletedEventArgs args)
+                {
+                        if (DownloadPhotoCompleted != null)
+                                DownloadPhotoCompleted (this, args);
+                }
+
+                internal void OnDownloadPhotoProgressChanged (
+                                DownloadPhotoProgressChangedEventArgs args)
+                {
+                        if (DownloadPhotoProgressChanged != null)
+                                DownloadPhotoProgressChanged (this, args);
+                }
+
+                internal void WhenRequestProgressChanged (object sender,
+                                RequestProgressChangedEventArgs args)
+                {
+                        if (args.RequestMethod == RequestMethod.PostMultipart)
+                                OnUploadPhotoProgressChanged (
+                                                new UploadPhotoProgressChangedEventArgs (
+                                                        args.BytesTransferred,
+                                                        args.TotalBytesToTranfer));
+                        else
+                                OnDownloadPhotoProgressChanged (
+                                                new DownloadPhotoProgressChangedEventArgs (
+                                                        args.BytesTransferred,
+                                                        args.TotalBytesToTranfer));
                 }
 	}
 }

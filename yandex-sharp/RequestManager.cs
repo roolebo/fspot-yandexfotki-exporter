@@ -73,19 +73,54 @@ namespace Mono.Yandex.Fotki {
                         token = Authentication.GetAuthorizationToken (username, password);
                 }
                 
-                internal byte[] GetBinary (string uri)
+                internal byte[] GetBinary (string uri) {
+                        return GetBinary (uri, false);
+                }
+
+                internal byte[] GetBinary (string uri, bool async)
                 {
                         HttpWebRequest request = CreateRequest (uri);
                         request.Method = "GET";
 
                         using (HttpWebResponse response = (HttpWebResponse) request.GetResponse ()) {
-                                return StreamHelper.ReadFully (response.GetResponseStream ());
+                                Stream response_stream = response.GetResponseStream ();
+                                byte[] buffer = new byte[1024];
+
+                                using (MemoryStream output = new MemoryStream ()) {
+                                        int read;
+                                        long readBytes = 0;
+
+                                        while((read = response_stream.Read (buffer,
+                                                        0, buffer.Length)) > 0) {
+                                                output.Write(buffer, 0, read);
+                                                readBytes += read;
+                                                if (async)
+                                                        OnRequestProgressChanged (
+                                                                        new RequestProgressChangedEventArgs (
+                                                                                RequestMethod.GetBinary,
+                                                                                readBytes,
+                                                                                response.ContentLength));
+                                        }
+                                        if (async)
+                                                OnRequestCompleted (new RequestCompletedEventArgs (
+                                                                        RequestMethod.GetBinary));
+
+                                        return output.ToArray ();
+                                }
                         }
                 }
 
                 internal string GetString (string uri)
                 {
-                        return Encoding.UTF8.GetString (GetBinary (uri));
+                        HttpWebRequest request = CreateRequest (uri);
+                        request.Method = "GET";
+
+                        using (HttpWebResponse response = (HttpWebResponse) request.GetResponse ()) {
+                                Stream response_stream = response.GetResponseStream ();
+                                byte [] response_bytes = 
+                                        StreamHelper.ReadFully (response_stream);
+                                return Encoding.UTF8.GetString (response_bytes);
+                        }
                 }
 
                 internal void Delete (string uri)
@@ -134,14 +169,39 @@ namespace Mono.Yandex.Fotki {
 
                 internal string PostMultipart (string uri, MultipartData data)
                 {
+                        return PostMultipart (uri, data, false);
+                }
+                internal string PostMultipart (string uri, MultipartData data, bool async)
+                {
                         const string boundary = "AaB03x";
 
                         HttpWebRequest request = CreateRequest (uri);
                         request.Method = "POST";
                         request.ContentType = "multipart/form-data; boundary=" + boundary;
                         Stream content = data.Form (boundary);
+                        request.ContentLength = content.Length;
+                        request.AllowWriteStreamBuffering = false;
                         Stream request_stream = request.GetRequestStream ();
-                        StreamHelper.CopyStream(content, request_stream);
+
+                        byte[] buffer = new byte[1024];
+                        int read;
+                        long readBytes = 0;
+
+                        while((read = content.Read(buffer, 0, buffer.Length)) > 0) {
+                                request_stream.Write(buffer, 0, read);
+                                readBytes += read;
+                                if (async) {
+                                        OnRequestProgressChanged (
+                                                        new RequestProgressChangedEventArgs (
+                                                                RequestMethod.PostMultipart,
+                                                                readBytes,
+                                                                content.Length));
+                                }
+                        }
+                        if (async)
+                                OnRequestCompleted (new RequestCompletedEventArgs (
+                                                        RequestMethod.PostMultipart));
+
                         request_stream.Close ();
                         content.Close ();
 

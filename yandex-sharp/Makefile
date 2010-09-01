@@ -11,6 +11,14 @@ SOURCES = Authentication.cs		\
 	  UserNotFoundException.cs	\
 	  AuthenticationFailedException.cs	\
 	  ConnectionFailedException.cs	\
+	  UploadPhotoCompletedEventArgs.cs	\
+	  UploadPhotoCompletedEventHandler.cs	\
+	  UploadPhotoProgressChangedEventArgs.cs	\
+	  UploadPhotoProgressChangedEventHandler.cs	\
+	  DownloadPhotoCompletedEventArgs.cs	\
+	  DownloadPhotoCompletedEventHandler.cs	\
+	  DownloadPhotoProgressChangedEventArgs.cs	\
+	  DownloadPhotoProgressChangedEventHandler.cs	\
 	  tests/PhotoTest.cs		\
 	  DateTimeHelper.cs		\
 	  tests/PhotoCollectionTest.cs

@@ -22,6 +22,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 using System;
+using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
@@ -38,6 +39,8 @@ namespace Mono.Yandex.Fotki {
                 private string link_next_page;
                 private string post_uri = "http://api-fotki.yandex.ru/post/";
                 private string photo_url_prefix;
+                private Queue<Photo> photos_to_upload;
+                private Thread upload_thread;
 
                 public DateTime Updated { get; private set; }
 
@@ -46,6 +49,7 @@ namespace Mono.Yandex.Fotki {
                         this.fotki = fotki;
 			photos = new Dictionary<uint, Photo> ();
                         this.xml = xml;
+                        photos_to_upload = new Queue<Photo> ();
 			ParseXml (xml);
 		}
 
@@ -66,6 +70,18 @@ namespace Mono.Yandex.Fotki {
                         string response = fotki.Request.PostMultipart (post_uri, data);
                         return GetPhoto (uint.Parse ((HttpUtility.ParseQueryString
                                                 (response)) ["image_id"]));
+                }
+
+                public void AddAsync (Photo photo)
+                {
+                        lock (photos_to_upload) {
+                                photos_to_upload.Enqueue (photo);
+                        }
+
+                        if (upload_thread == null || !upload_thread.IsAlive) {
+                                upload_thread = new Thread (UploadPhotosFromQueue);
+                                upload_thread.Start ();
+                        }
                 }
 
                 public void RemovePhoto (uint index)
@@ -102,6 +118,31 @@ namespace Mono.Yandex.Fotki {
 
                         photo_url_prefix = link_self.Substring (0, link_self.Length - 2) + "/";
 		}
+
+                private void UploadPhotosFromQueue ()
+                {
+                        Photo photo, uploaded_photo;
+
+                        Monitor.Enter (photos_to_upload);
+                        while (photos_to_upload.Count > 0) {
+                                Monitor.Exit (photos_to_upload);
+
+                                photo = photos_to_upload.Dequeue ();
+                                MultipartData data = BuildMultipartData (photo);
+                                string response = fotki.Request.PostMultipart (
+                                                post_uri, data, true);
+                                uint image_id = uint.Parse ((HttpUtility.ParseQueryString
+                                                                (response)) ["image_id"]);
+                                uploaded_photo = GetPhoto (image_id);
+                                var args = new UploadPhotoCompletedEventArgs (
+                                                uploaded_photo);
+                                fotki.OnUploadPhotoCompleted (args);
+
+                                Monitor.Enter (photos_to_upload);
+                        }
+                        
+                        Monitor.Exit (photos_to_upload);
+                }
 
                 private MultipartData BuildMultipartData (Photo photo)
                 {

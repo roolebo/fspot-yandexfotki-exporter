@@ -26,6 +26,9 @@ using System.Xml.XPath;
 using System.IO;
 using System.Text;
 using System.Globalization;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace Mono.Yandex.Fotki{
 
@@ -42,6 +45,8 @@ namespace Mono.Yandex.Fotki{
                 private string link_content;
                 private string real_id;
                 private FotkiService fotki;
+                private static Queue<string> photos_url_to_download = new Queue<string> ();
+                private static Thread download_thread;
 
                 internal string Filepath { get; set; }
 
@@ -89,10 +94,23 @@ namespace Mono.Yandex.Fotki{
 		}
 		
 		public byte[] Download (Size photoSize)
-		{
+                {
                         string url = GetPhotoUrlWithSpecifiedSize (photoSize);
 			return fotki.Request.GetBinary (url);
 		}
+
+                public void DownloadAsync (Size photoSize)
+                {
+                        lock (photos_url_to_download) {
+                                string url = GetPhotoUrlWithSpecifiedSize (photoSize);
+                                photos_url_to_download.Enqueue (url);
+                        }
+
+                        if (download_thread == null || !download_thread.IsAlive) {
+                                download_thread = new Thread (DownloadPhotosFromQueue);
+                                download_thread.Start ();
+                        }
+                }
 		
 		public void Update ()
 		{
@@ -151,6 +169,28 @@ namespace Mono.Yandex.Fotki{
                         link_edit_media = (string) nav.Evaluate ("string(/atom:entry/atom:link[@rel='edit-media']/@href)", mr);
                         link_content = (string) nav.Evaluate ("string(/atom:entry/atom:content/@src)", mr);
 		}
+
+                private void DownloadPhotosFromQueue ()
+                {
+                        string photo_url;
+                        byte [] downloaded_photo;
+
+                        Monitor.Enter (photos_url_to_download);
+                        while (photos_url_to_download.Count > 0) {
+                                Monitor.Exit (photos_url_to_download);
+
+                                photo_url = photos_url_to_download.Dequeue ();
+                                downloaded_photo = fotki.Request.GetBinary (
+                                                photo_url, true);
+                                var args = new DownloadPhotoCompletedEventArgs (
+                                                downloaded_photo);
+                                fotki.OnDownloadPhotoCompleted (args);
+
+                                Monitor.Enter (photos_url_to_download);
+                        }
+                        
+                        Monitor.Exit (photos_url_to_download);
+                }
 
                 private string GetSuffixFromPhotoSize (Size photoSize)
                 {

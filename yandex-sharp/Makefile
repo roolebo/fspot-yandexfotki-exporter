@@ -5,6 +5,8 @@ SOURCES = Authentication.cs		\
 	  RequestManager.cs		\
 	  StreamHelper.cs		\
 	  PhotoCollection.cs		\
+	  FeedEnumerator.cs		\
+	  PhotoCollectionEnumerator.cs	\
 	  Photo.cs			\
 	  MultipartData.cs		\
 	  WebHelper.cs			\

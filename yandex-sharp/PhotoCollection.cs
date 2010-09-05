@@ -92,7 +92,7 @@ namespace Mono.Yandex.Fotki {
 
 		public IEnumerator<Photo> GetEnumerator ()
 		{
-			return new PhotoCollectionEnumerator (this);
+			return new PhotoCollectionEnumerator (link_self, fotki);
 		}
 
                 IEnumerator IEnumerable.GetEnumerator ()
@@ -163,98 +163,6 @@ namespace Mono.Yandex.Fotki {
                                                 photo.AdultContent.ToString ().ToLower (),
                                                 MultipartData.Parameter.ParamType.Field));
                         return data;
-                }
-
-                class PhotoCollectionEnumerator : IEnumerator<Photo> {
-                        private PhotoCollection photo_collection;
-                        private XmlDocument document;
-                        private XmlNamespaceManager manager;
-                        private XPathNavigator navigator;
-                        private XPathNodeIterator iterator;
-                        private XPathExpression entry_expression;
-                        private XPathExpression next_page_expression;
-                        private Photo current;
-                        private string link_next_page;
-
-                        public PhotoCollectionEnumerator (PhotoCollection photo_collection)
-                        {
-                                this.photo_collection = photo_collection;
-                                document = new XmlDocument ();
-
-                                entry_expression = XPathExpression.Compile (
-                                                "/atom:feed/atom:entry");
-                                next_page_expression = XPathExpression.Compile (
-                                                "string(/atom:feed/atom:link[@rel='next']/@href)");
-
-                                LoadXml (photo_collection.xml);
-                                link_next_page = photo_collection.link_next_page;
-                        }
-
-                        public bool MoveNext ()
-                        {
-                                bool res = iterator.MoveNext ();
-                                if (res == false && !String.IsNullOrEmpty (link_next_page)) {
-                                        string next_page = photo_collection.fotki.Request.GetString (link_next_page);
-                                        LoadXml (next_page);
-                                        link_next_page = GetNextPageUrl ();
-                                        //move to entry on newly loaded page
-                                        res = iterator.MoveNext ();
-                                }
-
-                                if (res == true)
-                                        current = new Photo (photo_collection.fotki,
-                                                        iterator.Current.OuterXml);
-                                else
-                                        current = null;
-
-                                return res;
-                        }
-
-                        public void Reset ()
-                        {
-                                LoadXml (photo_collection.xml);
-                                link_next_page = photo_collection.link_next_page;
-                                current = null;
-                        }
-
-                        public void Dispose ()
-                        {
-                        }
-
-                        public Photo Current {
-                                get {
-                                        if (current == null)
-                                                throw new InvalidOperationException ();
-                                        return current;
-                                }
-                        }
-
-                        object IEnumerator.Current {
-                                get {
-                                        return Current;
-                                }
-                        }
-
-                        string GetNextPageUrl ()
-                        {
-                                return (string) navigator.Evaluate ("string(//atom:link[@rel='next']/@href)", manager);
-                        }
-
-                        void LoadXml (string xml)
-                        {
-                                document.LoadXml (xml);
-                                navigator = document.CreateNavigator ();
-
-                                manager = new XmlNamespaceManager (navigator.NameTable);
-                                manager.AddNamespace ("app","http://www.w3.org/2007/app");
-                                manager.AddNamespace ("f","yandex:fotki");
-                                manager.AddNamespace ("atom","http://www.w3.org/2005/Atom");
-
-                                entry_expression.SetContext (manager);
-                                next_page_expression.SetContext (manager);
-
-                                iterator = navigator.Select (entry_expression);
-                        }
                 }
 	}
 }

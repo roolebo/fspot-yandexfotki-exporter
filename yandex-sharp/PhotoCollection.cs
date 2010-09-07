@@ -107,30 +107,5 @@ namespace Mono.Yandex.Fotki {
 
                         photo_url_prefix = link_self.Substring (0, link_self.Length - 2) + "/";
 		}
-
-                private void UploadPhotosFromQueue ()
-                {
-                        Photo photo, uploaded_photo;
-
-                        Monitor.Enter (photos_to_upload);
-                        while (photos_to_upload.Count > 0) {
-                                Monitor.Exit (photos_to_upload);
-
-                                photo = photos_to_upload.Dequeue ();
-                                MultipartData data = MultipartDataHelper.BuildMultipartData (photo);
-                                string response = fotki.Request.PostMultipart (
-                                                PhotoCollection.post_uri, data, true);
-                                uint image_id = uint.Parse ((HttpUtility.ParseQueryString
-                                                                (response)) ["image_id"]);
-                                uploaded_photo = fotki.GetPhotos ().GetPhoto (image_id);
-                                var args = new UploadPhotoCompletedEventArgs (
-                                                uploaded_photo);
-                                fotki.OnUploadPhotoCompleted (args);
-
-                                Monitor.Enter (photos_to_upload);
-                        }
-
-                        Monitor.Exit (photos_to_upload);
-                }
 	}
 }

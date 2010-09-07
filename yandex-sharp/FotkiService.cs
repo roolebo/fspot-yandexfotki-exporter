@@ -31,7 +31,7 @@ namespace Mono.Yandex.Fotki {
 	public class FotkiService {
 		private string user;
 		private PhotoCollection photos;
-		//private AlbumCollection albums;
+		private AlbumCollection albums;
 		private string link_photos;
 		private string link_albums;
                 private string link_service_document = 
@@ -90,14 +90,14 @@ namespace Mono.Yandex.Fotki {
                         return photos;
                 }
                 
-                //public AlbumCollection GetAlbums ()
-                //{
-                //        if (albums == null) {
-                //                var albums_xml = request_manager.GetString (link_albums);
-                //                albums  = new AlbumCollection (albums_xml);
-                //        }
-                //        return albums;
-                //}
+                public AlbumCollection GetAlbums ()
+                {
+                        if (albums == null) {
+                                var albums_xml = request_manager.GetString (link_albums);
+                                albums  = new AlbumCollection (this, albums_xml);
+                        }
+                        return albums;
+                }
 
                 private void ParseServiceDocument (string serviceDocument)
                 {
